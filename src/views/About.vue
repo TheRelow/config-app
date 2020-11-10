@@ -1,5 +1,5 @@
 <template>
-  <v-row class="x-row">
+  <v-row class="x-row" align="center" justify="center">
     <ModalOpenPort title="Open Port" />
   </v-row>
 </template>

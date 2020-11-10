@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="dialog" persistent max-width="400">
     <template v-slot:activator="{ on, attrs }">
-      <button class="x-row__item" v-bind="attrs" v-on="on">{{ title }}</button>
+      <button class="x-row__item" v-bind="attrs" v-on="on"><img class="x-row__item-plus" src="../assets/add.svg" />{{ title }}</button>
     </template>
     <v-card>
       <v-card-title> Подключение к устройству </v-card-title>
