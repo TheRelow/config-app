@@ -1,0 +1,12 @@
+.x-row {
+  display: flex;
+  flex-wrap: wrap;
+  height: 100%;
+  padding-left: 12px;
+}
+.x-row__item {
+  width: 18vw;
+  height: 18vw;
+  border: 2px dashed #9898a4 !important;
+  border-radius: 5px;
+}
