@@ -65,8 +65,13 @@
 </template>
 
 <script>
-import serialport from "serialport";
+const serialport = require("serialport");
+// import serialport from "serialport";
 import {ipcRenderer} from "electron";
+const ModbusRTU = require("modbus-serial");
+// eslint-disable-next-line no-unused-vars
+const client = new ModbusRTU();
+
 
 export default {
   name: "ModalOpenPort",
@@ -112,6 +117,26 @@ export default {
     serialport.list().then((portslist) => {
       portslist.forEach((item) => {
         this.ports.push(item.path);
+        console.log(item)
+
+        let serialPort = new serialport(item.path, {baudRate: 9600});
+        console.log(serialPort)
+
+        client.open()
+            .then((v)=>{
+              console.log(v)
+            })
+            .catch((v)=>{
+              console.log(v)
+            })
+
+        // client.connectRTU(serialPort, {baudRate: 9600})
+        //     .then((v)=>{
+        //       console.log(v)
+        //     })
+        //     .catch((v)=>{
+        //       console.log(v)
+        //     })
       });
 
       if (this.ports.length > 0) {
