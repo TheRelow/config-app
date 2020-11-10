@@ -55,7 +55,7 @@
 
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="green darken-1" text @click="dialog = false"> OK </v-btn>
+        <v-btn color="green darken-1" text @click="onOk"> OK </v-btn>
         <v-btn color="green darken-1" text @click="dialog = false">
           Cancel
         </v-btn>
@@ -66,6 +66,7 @@
 
 <script>
 import serialport from "serialport";
+import {ipcRenderer} from "electron";
 
 export default {
   name: "ModalOpenPort",
@@ -94,6 +95,17 @@ export default {
         return "1-247";
       },
     };
+  },
+
+  methods: {
+    async onOk() {
+      this.dialog = false;
+      ipcRenderer.send("port-selection");
+      ipcRenderer.once('port-response', (e, args)=>{
+        console.log(e)
+        console.log(args)
+      })
+    },
   },
 
   created() {

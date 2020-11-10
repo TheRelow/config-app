@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, screen, ipcMain } from 'electron'
+import {app, protocol, BrowserWindow, screen, ipcMain, ipcRenderer} from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -157,4 +157,25 @@ ipcMain.on("click-from-renderer", () => {
   } else {
     worker.webContents.send('ping', 'whoooooooh!')
   }
+})
+
+ipcMain.on("port-selection", () => {
+  if (worker == null) {
+    createWorkerWindow(() => {
+      worker.webContents.send('port-selection', 'port selected')
+    })
+  } else {
+    worker.webContents.send('port-selection', 'port selected')
+  }
+
+  let timer = setTimeout(()=>{
+    win.webContents.send('port-response', 'server timeOut')
+    ipcMain.removeListener('port-response', ()=>{
+    })
+  }, 1000)
+
+  ipcMain.on("port-response", () => {
+    clearTimeout(timer);
+    win.webContents.send('port-response', 'server response')
+  })
 })
