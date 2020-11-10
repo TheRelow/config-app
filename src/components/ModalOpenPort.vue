@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="dialog" persistent max-width="400">
     <template v-slot:activator="{ on, attrs }">
-      <button class="x-row__item" v-bind="attrs" v-on="on"><img class="x-row__item-plus" src="../assets/add.svg" />{{ title }}</button>
+      <button class="x-row__item" v-bind="attrs" v-on="on"><img alt="plus icon" class="x-row__item-plus" src="../assets/add.svg" />{{ title }}</button>
     </template>
     <v-card>
       <v-card-title> Подключение к устройству </v-card-title>
@@ -90,7 +90,7 @@ export default {
       address: 247,
 
       numberRule: (v) => {
-        if (!v.trim()) return true;
+        if (!v.trim) return true;
         if (!isNaN(parseFloat(v)) && v >= 1 && v <= 247) return true;
         return "1-247";
       },
