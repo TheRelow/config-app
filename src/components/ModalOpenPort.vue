@@ -1,7 +1,14 @@
 <template>
   <v-dialog v-model="dialog" persistent max-width="400">
     <template v-slot:activator="{ on, attrs }">
-      <button class="x-row__item" v-bind="attrs" v-on="on"><img alt="plus icon" class="x-row__item-plus" src="../assets/add.svg" />{{ title }}</button>
+      <button class="x-row__item" v-bind="attrs" v-on="on">
+        <img
+            alt="plus icon"
+            class="x-row__item-plus"
+            src="../assets/add.svg"
+        />{{ title }}
+      </button>
+      <v-btn @click="testConnection"> Test conection </v-btn>
     </template>
     <v-card>
       <v-card-title> Подключение к устройству </v-card-title>
@@ -36,18 +43,18 @@
         <v-row>
           <v-col cols="8">
             <v-select
-              v-model="protocol"
-              :items="protocols"
-              required
-              label="Протокол"
+                v-model="protocol"
+                :items="protocols"
+                required
+                label="Протокол"
             />
           </v-col>
           <v-col cols="4">
             <v-text-field
-              v-model="address"
-              :rules="[numberRule]"
-              required
-              label="Адрес"
+                v-model="address"
+                :rules="[numberRule]"
+                required
+                label="Адрес"
             />
           </v-col>
         </v-row>
@@ -65,13 +72,10 @@
 </template>
 
 <script>
-const serialport = require("serialport");
-// import serialport from "serialport";
-import {ipcRenderer} from "electron";
-const ModbusRTU = require("modbus-serial");
-// eslint-disable-next-line no-unused-vars
-const client = new ModbusRTU();
+import { ipcRenderer } from "electron";
 
+import serialport from "serialport";
+import ModbusRTU from "modbus-serial";
 
 export default {
   name: "ModalOpenPort",
@@ -88,7 +92,7 @@ export default {
       port: "",
       baudrate: 9600,
       databits: 8,
-      parity: "Нет",
+      parity: "none",
       stopbits: 1,
 
       protocol: "",
@@ -106,46 +110,56 @@ export default {
     async onOk() {
       this.dialog = false;
       ipcRenderer.send("port-selection");
-      ipcRenderer.once('port-response', (e, args)=>{
-        console.log(e)
-        console.log(args)
+      ipcRenderer.once("port-response", (e, args) => {
+        console.log(e);
+        console.log(args);
+      });
+    },
+
+    // В твою задачу входит переписать эту функция в асинхронную
+    //  промисами или через anync / await
+    testConnection() {
+      const client = new ModbusRTU();
+
+      client.connectRTUBuffered(this.port, {
+        baudRate: this.baudrate,
+        databits: this.databits,
+        parity: this.parity,
+        stopbits: this.stopbits,
+        autoOpen: false,
+      }).then(()=>{
+        const refreshIntervalId = setInterval(()=>{
+          if (client.isOpen) {
+
+            client.setID(this.address);
+
+            client.readInputRegisters(40000, 1, function (err, data) {
+              if (err) {
+                console.log(err);
+              } else {
+                console.log(data);
+                client.close();
+                clearInterval(refreshIntervalId);
+              }
+            });
+          }
+        }, 1000);
+      }).catch((v)=>{
+        throw v
       })
+
     },
   },
 
   created() {
-    // client.connectRTU("COM4")
-    //     .then((v)=>{
-    //       console.log(v)
-    //     })
-    //     .catch((v)=>{
-    //       console.log(v)
-    //     })
-
     serialport.list().then((portslist) => {
       portslist.forEach((item) => {
         this.ports.push(item.path);
-        console.log(item)
-
-        // eslint-disable-next-line no-unused-vars
-        let serialPort = new serialport(item.pnpId, {baudRate: 9600});
-        // console.log(serialPort)
-
-        // let openM = client.open();
-        //
-        // if (openM) {
-        //   openM
-        //     .then((v)=>{
-        //       console.log(v)
-        //     })
-        //     .catch((v)=>{
-        //       console.log(v)
-        //     })
-        // }
+        console.log(item);
       });
 
       if (this.ports.length > 0) {
-        this.port = this.ports[0];
+        this.port = this.ports[this.ports.length-1];
       }
     });
 
