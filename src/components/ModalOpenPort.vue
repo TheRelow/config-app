@@ -128,22 +128,19 @@ export default {
         stopbits: this.stopbits,
         autoOpen: false,
       }).then(()=>{
-        const refreshIntervalId = setInterval(()=>{
-          if (client.isOpen) {
+        if (client.isOpen) {
 
-            client.setID(this.address);
+          client.setID(this.address);
 
-            client.readInputRegisters(40000, 1, function (err, data) {
-              if (err) {
-                console.log(err);
-              } else {
-                console.log(data);
-                client.close();
-                clearInterval(refreshIntervalId);
-              }
-            });
-          }
-        }, 1000);
+          client.readInputRegisters(40000, 1, function (err, data) {
+            if (err) {
+              console.log(err);
+            } else {
+              console.log(data);
+              client.close();
+            }
+          });
+        }
       }).catch((v)=>{
         throw v
       })
