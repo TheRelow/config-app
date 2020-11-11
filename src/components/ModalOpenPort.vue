@@ -76,6 +76,7 @@ import { ipcRenderer } from "electron";
 
 import serialport from "serialport";
 import ModbusRTU from "modbus-serial";
+const storage = require('electron-storage');
 
 export default {
   name: "ModalOpenPort",
@@ -149,6 +150,32 @@ export default {
   },
 
   created() {
+    let data = {
+      some: 'text'
+    }
+    // для наглядности разместил здесь
+    // чтобы можно было вывести в консоль без эмиттеров
+    storage.isPathExists('cfg.json')
+      .then(itDoes => {
+        if (itDoes) {
+          storage.get('cfg.json')
+            .then(data => {
+              console.log(data);
+            })
+            .catch(err => {
+              console.error(err);
+            });
+        } else {
+          storage.set('cfg.json', JSON.stringify(data))
+            .then(() => {
+              console.log('The file was successfully written to the storage');
+            })
+            .catch(err => {
+              console.error(err);
+            });
+        }
+      });
+
     serialport.list().then((portslist) => {
       portslist.forEach((item) => {
         this.ports.push(item.path);
