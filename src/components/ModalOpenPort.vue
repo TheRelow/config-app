@@ -114,29 +114,34 @@ export default {
   },
 
   created() {
+    // client.connectRTU("COM4")
+    //     .then((v)=>{
+    //       console.log(v)
+    //     })
+    //     .catch((v)=>{
+    //       console.log(v)
+    //     })
+
     serialport.list().then((portslist) => {
       portslist.forEach((item) => {
         this.ports.push(item.path);
         console.log(item)
 
-        let serialPort = new serialport(item.path, {baudRate: 9600});
-        console.log(serialPort)
+        // eslint-disable-next-line no-unused-vars
+        let serialPort = new serialport(item.pnpId, {baudRate: 9600});
+        // console.log(serialPort)
 
-        client.open()
-            .then((v)=>{
-              console.log(v)
-            })
-            .catch((v)=>{
-              console.log(v)
-            })
-
-        // client.connectRTU(serialPort, {baudRate: 9600})
+        // let openM = client.open();
+        //
+        // if (openM) {
+        //   openM
         //     .then((v)=>{
         //       console.log(v)
         //     })
         //     .catch((v)=>{
         //       console.log(v)
         //     })
+        // }
       });
 
       if (this.ports.length > 0) {
