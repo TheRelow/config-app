@@ -3,6 +3,10 @@
     <v-data-table
         :headers="headers"
         :items="tableData"
+        :single-expand="singleExpand"
+        :expanded.sync="expanded"
+        item-key="name"
+        show-expand
         :items-per-page="5"
         class="elevation-1"
     >
@@ -69,6 +73,11 @@
           </template>
         </v-edit-dialog>
       </template>
+      <template v-slot:expanded-item="{ headers, item }">
+        <td :colspan="headers.length">
+          More info about {{ item.name }}
+        </td>
+      </template>
     </v-data-table>
   </div>
 </template>
@@ -79,6 +88,8 @@ export default {
   props: ['tableData'],
   data() {
     return {
+      expanded: [],
+      singleExpand: true,
       snack: false,
       snackColor: '',
       snackText: '',
@@ -110,6 +121,7 @@ export default {
         { text: 'Carbs (g)', value: 'carbs' },
         { text: 'Protein (g)', value: 'protein' },
         { text: 'Iron (%)', value: 'iron' },
+        { text: '', value: 'data-table-expand' },
       ]
     },
   },
