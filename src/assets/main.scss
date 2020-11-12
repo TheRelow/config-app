@@ -1,3 +1,7 @@
+.v-system-bar--fixed {
+  z-index: 9999;
+}
+
 .x-row {
   display: flex;
   flex-wrap: wrap;
@@ -22,4 +26,17 @@
   width: 20%;
   height: auto;
   margin: 0 auto 12px;
+}
+
+.v-toolbar__content {
+  align-items: center;
+}
+
+.switch-autosave {
+  .v-input__slot {
+    margin-bottom: 0;
+  }
+  .v-messages {
+    display: none;
+  }
 }

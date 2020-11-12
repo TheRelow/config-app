@@ -50,7 +50,7 @@ export default {
     items: [
       { icon: "IconDashboard", title: "Dashboard", href: "/" },
       { icon: "IconSettings", title: "About", href: "/about" },
-      { icon: "IconHelp", title: "Help", href: "#" },
+      { icon: "IconHelp", title: "Help", href: "/table" },
     ],
   }),
 

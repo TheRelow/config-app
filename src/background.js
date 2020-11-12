@@ -4,8 +4,32 @@ import {app, protocol, BrowserWindow, screen, ipcMain, ipcRenderer} from 'electr
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
+const storage = require('electron-storage');
 
+let data = {
+  some: 'text'
+}
 
+storage.isPathExists('cfg.json')
+    .then(itDoes => {
+      if (itDoes) {
+        storage.get('cfg.json')
+          .then(data => {
+            console.log(data);
+          })
+          .catch(err => {
+            console.error(err);
+          });
+      } else {
+        storage.set('cfg.json', JSON.stringify(data))
+          .then(() => {
+            console.log('The file was successfully written to the storage');
+          })
+          .catch(err => {
+            console.error(err);
+          });
+      }
+    });
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([{
@@ -162,22 +186,28 @@ ipcMain.on("click-from-renderer", () => {
 })
 
 ipcMain.on("port-selection", () => {
-  if (worker == null) {
-    createWorkerWindow(() => {
+  // eslint-disable-next-line no-unused-vars
+  const p = new Promise((resolve, reject) => {
+    if (worker == null) {
+      createWorkerWindow(() => {
+        worker.webContents.send('port-selection', 'port selected')
+      })
+        .then(()=>resolve())
+    } else {
       worker.webContents.send('port-selection', 'port selected')
-    })
-  } else {
-    worker.webContents.send('port-selection', 'port selected')
-  }
-
-  let timer = setTimeout(()=>{
-    win.webContents.send('port-response', 'server timeOut')
-    ipcMain.removeListener('port-response', ()=>{
-    })
-  }, 1000)
-
-  ipcMain.on("port-response", () => {
-    clearTimeout(timer);
-    win.webContents.send('port-response', 'server response')
+      resolve()
+    }
   })
+    .then(()=>{
+      let timer = setTimeout(()=>{
+        win.webContents.send('port-response', 'server timeOut')
+        ipcMain.removeListener('port-response', ()=>{
+        })
+      }, 1000)
+
+      ipcMain.on("port-response", () => {
+        clearTimeout(timer);
+        win.webContents.send('port-response', 'server response')
+      })
+    })
 })
