@@ -2,8 +2,10 @@
   <div class="ui-titlebar">
     <div class="ui-titleicon"></div>
     <div class="ui-titletext">
-      {{ title }}
-      <div id="drag-region"></div>
+      <div class="ui-titletext__textarea">
+        {{ title }}
+        <div id="drag-region"></div>
+      </div>
     </div>
     <div class="ui-titlecontrols">
       <button class="ui-btn minimize" v-on:click="onMinimize">
