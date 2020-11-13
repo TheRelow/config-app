@@ -127,7 +127,8 @@ export default {
         parity: this.parity,
         stopbits: this.stopbits,
         autoOpen: false,
-      }).then(()=>{
+      }).then((v)=>{
+        console.log(v)
         if (client.isOpen) {
 
           client.setID(this.address);
@@ -135,6 +136,7 @@ export default {
           client.readInputRegisters(40000, 1, function (err, data) {
             if (err) {
               console.log(err);
+              client.close();
             } else {
               console.log(data);
               client.close();
@@ -142,6 +144,7 @@ export default {
           });
         }
       }).catch((v)=>{
+        client.close();
         throw v
       })
 
@@ -157,7 +160,7 @@ export default {
       });
 
       if (this.ports.length > 0) {
-        this.port = this.ports[this.ports.length-1];
+        this.port = this.ports[this.ports.length-2];
       }
     });
 

@@ -8,7 +8,7 @@
 import ComponentTable from "@/components/ComponentTable";
 
 export default {
-  name: "table",
+  name: "pageTable",
   components: {
     ComponentTable
   },

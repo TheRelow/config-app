@@ -1,35 +1,9 @@
 'use strict'
 
-import {app, protocol, BrowserWindow, screen, ipcMain, ipcRenderer} from 'electron'
+import {app, protocol, BrowserWindow, screen, ipcMain} from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
-const storage = require('electron-storage');
-
-let data = {
-  some: 'text'
-}
-
-storage.isPathExists('cfg.json')
-    .then(itDoes => {
-      if (itDoes) {
-        storage.get('cfg.json')
-          .then(data => {
-            console.log(data);
-          })
-          .catch(err => {
-            console.error(err);
-          });
-      } else {
-        storage.set('cfg.json', JSON.stringify(data))
-          .then(() => {
-            console.log('The file was successfully written to the storage');
-          })
-          .catch(err => {
-            console.error(err);
-          });
-      }
-    });
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([{
@@ -42,7 +16,6 @@ let win, worker = null
 async function createMainWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
-  // Create the browser window.
   win = new BrowserWindow({
     width: width * 0.85,
     height: height * 0.85,
@@ -116,6 +89,7 @@ app.allowRendererProcessReuse = false;
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
+
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') {
@@ -173,16 +147,6 @@ ipcMain.on("window-unmaximize", () => {
 
 ipcMain.on("window-close", () => {
   win.close();
-})
-
-ipcMain.on("click-from-renderer", () => {
-  if (worker == null) {
-    createWorkerWindow(() => {
-      worker.webContents.send('ping', 'created!')
-    })
-  } else {
-    worker.webContents.send('ping', 'whoooooooh!')
-  }
 })
 
 ipcMain.on("port-selection", () => {

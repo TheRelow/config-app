@@ -57,6 +57,7 @@ html {
 <script>
 import TitleBar from "./components/TitleBar.vue";
 import NavBar from "./components/NavBar.vue";
+import {ipcRenderer} from "electron";
 
 export default {
   name: "App",
@@ -70,6 +71,11 @@ export default {
 
   created() {
     this.$vuetify.theme.dark = true;
+
+    ipcRenderer.on("logInApp", (e, args) => {
+      console.log(e);
+      console.log(args);
+    });
   },
 };
 </script>

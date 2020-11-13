@@ -2,10 +2,6 @@
 
 const { ipcRenderer } = require("electron")
 
-ipcRenderer.on('ping', (event, message) => {
-    console.log(message)
-})
-
 ipcRenderer.on('port-selection', (event, message) => {
     console.log(message)
     setTimeout(()=>{
