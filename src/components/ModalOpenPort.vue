@@ -3,9 +3,9 @@
     <template v-slot:activator="{ on, attrs }">
       <button class="x-row__item" v-bind="attrs" v-on="on">
         <img
-            alt="plus icon"
-            class="x-row__item-plus"
-            src="../assets/add.svg"
+          alt="plus icon"
+          class="x-row__item-plus"
+          src="../assets/add.svg"
         />{{ title }}
       </button>
       <v-btn @click="connection"> Test conection </v-btn>
@@ -75,28 +75,21 @@
 import { ipcRenderer } from "electron";
 import serialport from "serialport";
 import ModbusRTU from "modbus-serial";
-
 export default {
   name: "ModalOpenPort",
-
   props: ["title"],
-
   data() {
     return {
       dialog: false,
-
       ports: [],
       protocols: ["Modbus RTU", "Modbus ASCII"],
-
       port: "",
       baudrate: 9600,
       databits: 8,
       parity: "none",
       stopbits: 1,
-
       protocol: "",
       address: 247,
-
       numberRule: (v) => {
         if (!v.trim) return true;
         if (!isNaN(parseFloat(v)) && v >= 1 && v <= 247) return true;
@@ -104,18 +97,15 @@ export default {
       },
     };
   },
-
   methods: {
     async onOk() {
       this.dialog = false;
       this.connection()
     },
-
     // В твою задачу входит переписать эту функция в асинхронную
     //  промисами или через anync / await
     testConnection() {
       const client = new ModbusRTU();
-
       client.connectRTUBuffered(this.port, {
         baudRate: this.baudrate,
         databits: this.databits,
@@ -125,9 +115,7 @@ export default {
       }).then((v)=>{
         console.log(v)
         if (client.isOpen) {
-
           client.setID(this.address);
-
           client.readInputRegisters(40000, 1, function (err, data) {
             if (err) {
               console.log(err);
@@ -142,7 +130,6 @@ export default {
         client.close();
         throw v
       })
-
     },
     connection() {
       let request = {
@@ -166,24 +153,19 @@ export default {
       ipcRenderer.send("ui-request", request);
     },
   },
-
   created() {
-
     serialport.list().then((portslist) => {
       portslist.forEach((item) => {
         this.ports.push(item.path);
         console.log(item);
       });
-
       if (this.ports.length > 0) {
         this.port = this.ports[this.ports.length-1];
       }
     });
-
     if (this.protocols.length > 0) {
       this.protocol = this.protocols[0];
     }
-
     ipcRenderer.on("ui-response", (e, args) => {
       console.log(args);
     });

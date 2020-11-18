@@ -1,9 +1,6 @@
 'use strict'
 
 const { ipcRenderer } = require("electron")
-// eslint-disable-next-line no-unused-vars
-import serialport from "serialport";
-// eslint-disable-next-line no-unused-vars
 import ModbusRTU from "modbus-serial";
 
 let result = {
@@ -11,41 +8,64 @@ let result = {
 }
 
 function processRequest(reg_request, message, client) {
+
   let reg_result = {
     type: reg_request.type,
     address: reg_request.address
-  }
+  };
 
-  if (client.isOpen) {
-    client.setID(message.address);
-    client.readInputRegisters(reg_request.address, reg_request.length, function (err, data) {
-      if (err) {
-        reg_result.value = err
-        reg_result.type = 'error'
-        console.log(err);
-      } else {
-        reg_result.value = data
-        console.log(data);
-      }
-    });
-  }
+  return new Promise((resolve, reject)=>{
 
-  return reg_result
+    switch (reg_request.type) {
+      case "FC4":
+        new Promise((resolveR, rejectR) => {
+          if (client.isOpen) {
+            client.setID(message.address);
+            client.readInputRegisters(reg_request.address, reg_request.length, function (err, data) {
+              if (err) {
+                reg_result.value = err
+                reg_result.type = 'error'
+                if (client.isOpen) {
+                  client.close();
+                }
+                rejectR(reg_result)
+              } else {
+                reg_result.value = data
+                console.log(data)
+                resolveR(reg_result)
+                if (client.isOpen) {
+                  client.close();
+                }
+              }
+            });
+          }
+        }).then(r=>{
+          resolve(r)
+        }).catch(r=>{
+          reg_result.value = null
+          reg_result.type = r
+          reject(reg_result)
+        })
+        break;
+
+      default:
+        reg_result.value = null
+        reg_result.type = 'Unknown reqeust type'
+        break;
+    }
+  })
+
 }
 
 
 ipcRenderer.on('worker-request', (event, message) => {
-  console.log('request recived')
 
   let timerId = setInterval(() => {
-    console.log('interval enter')
     ipcRenderer.send("worker-response", result)
     result.data = [];
   }, message.timeout);
-  console.log('timer started')
 
   const client = new ModbusRTU();
-  console.log('client started')
 
   client.connectRTUBuffered(message.port, {
     baudRate: message.baudRate,
@@ -55,38 +75,43 @@ ipcRenderer.on('worker-request', (event, message) => {
     autoOpen: false,
   })
     .then(()=>{
-      console.log('client connected')
-      try {
-        console.log('for started')
-        for (let value of message.data) {
-          (async ()=>{
-            console.log('for enter')
-            let reg_value = await processRequest(value, message, client);
-            result.data.push(reg_value);
-            console.log(reg_value)
-          })();
+      return new Promise((resolve)=>{
+        try {
+          for (let value of message.data) {
+            let reg_value = null;
+            processRequest(value, message, client)
+              .then((v)=>{
+                reg_value = v
+                console.log(reg_value)
+                result.data.push(reg_value);
+                resolve()
+              })
+              .catch((v)=>{
+                reg_value = v
+                console.log(reg_value)
+                result.data.push(reg_value);
+                resolve()
+              })
+          }
         }
-      }
-      catch (e) {
-        console.log('for error')
-        console.log(e)
-      }
+        catch (e) {
+          console.log(e)
+        }
+      })
     })
     .then(()=>{
-      console.log('for finally')
       clearInterval(timerId);
       if (result.data) {
         result.complete = true;
-        console.log(result)
         ipcRenderer.send("worker-response", result)
         result.data = [];
         result.complete = false;
       }
+    })
+    .catch((v)=>{
       if (client.isOpen) {
         client.close();
       }
-    })
-    .catch((v)=>{
       throw v
     })
 })
