@@ -1,9 +1,41 @@
 'use strict'
 
+// eslint-disable-next-line no-unused-vars
 import {app, protocol, BrowserWindow, screen, ipcMain} from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
+// eslint-disable-next-line no-unused-vars
+import { getStorageInfo, setStorageInfo } from './modules/ElectronStorage'
 const isDevelopment = process.env.NODE_ENV !== 'production'
+
+let rem = BrowserWindow.remote;
+
+let win = null
+let worker = null
+let winMess = []
+let workerMess = []
+let cfg = {
+  width: null,
+  height: null,
+  maximized: null,
+}
+// eslint-disable-next-line no-unused-vars
+let cfgChanged = false
+
+function messageToWin(msg) {
+  if (win !== null && win != undefined) {
+    win.webContents.send('messageToWin', msg)
+  } else {
+    winMess.push(msg)
+  }
+}
+function messageToWorker(msg) {
+  if (worker != null && worker != undefined) {
+    worker.webContents.send('messageToWorker', msg)
+  } else {
+    workerMess.push(msg)
+  }
+}
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([{
@@ -11,14 +43,25 @@ protocol.registerSchemesAsPrivileged([{
   privileges: { secure: true, standard: true }
 }])
 
-let win, worker = null
-
 async function createMainWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
+  cfg = await getStorageInfo('cfg.json')
+  messageToWin(cfg)
+  messageToWin(screen.getPrimaryDisplay())
+
+  if (cfg.width == null) {
+    cfg.width = width * 0.85
+    cfgChanged = true
+  }
+  if (cfg.height == null) {
+    cfg.height = height * 0.85
+    cfgChanged = true
+  }
+
   win = new BrowserWindow({
-    width: width * 0.85,
-    height: height * 0.85,
+    width: cfg.width,
+    height: cfg.height,
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
@@ -42,12 +85,22 @@ async function createMainWindow() {
 
   win.on("resize", () => {
     if (win !== null) win.webContents.send('window-resize', win.isMaximized());
+
+    messageToWin(typeof win.webContents.getAllWebContents)
   });
 
   win.on('closed', () => {
     win = null
     worker = null;
   })
+
+  winMess.forEach((i)=>{
+    messageToWin(i)
+  })
+  winMess = []
+
+  let siz = rem.getSize()
+  messageToWin(siz)
 }
 
 async function createWorkerWindow(callback) {
@@ -80,6 +133,11 @@ async function createWorkerWindow(callback) {
   worker.on('closed', () => {
     worker = null;
   });
+
+  workerMess.forEach((i)=>{
+    messageToWorker(i)
+  })
+  workerMess = []
 }
 
 
@@ -139,14 +197,21 @@ ipcMain.on("window-minimize", () => {
 
 ipcMain.on("window-maximize", () => {
   win.maximize();
+  cfg.maximized = true;
+  cfgChanged = true;
 })
 
 ipcMain.on("window-unmaximize", () => {
   win.unmaximize();
+  cfg.maximized = false;
+  cfgChanged = true;
 })
 
 ipcMain.on("window-close", () => {
-  win.close();
+  (async ()=>{
+    await setStorageInfo('cfg.json', cfg)
+    win.close();
+  })();
 })
 
 ipcMain.on("port-selection", () => {
@@ -174,4 +239,17 @@ ipcMain.on("port-selection", () => {
         win.webContents.send('port-response', 'server response')
       })
     })
+})
+
+ipcMain.on("ui-request", (event, args) => {
+  if (worker == null) {
+    createWorkerWindow(() => {
+      worker.webContents.send('worker-request', args);
+    })
+  } else {
+    worker.webContents.send('worker-request', args);
+  }
+})
+ipcMain.on("worker-response", (event, args) => {
+  win.webContents.send('ui-response', args);
 })

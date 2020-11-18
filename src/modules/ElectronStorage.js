@@ -1,40 +1,17 @@
 const storage = require('electron-storage');
 
-// eslint-disable-next-line no-unused-vars
-function getStorageInfo(file) {
-  storage.isPathExists(file)
-    .then(itDoes => {
-      if (itDoes) {
-        storage.get(file)
-          .then(data => {
-            return {
-              status: 'success',
-              response: data
-            }
-          })
-          .catch(err => {
-            return {
-              status: 'error',
-              response: err
-            }
-          });
-      } else {
-        return {
-          status: 'error',
-          response: 'File does not exists'
-        }
-      }
+export async function getStorageInfo(file) {
+  let returnData = 'something wrong';
+  await storage.get(file)
+    .then(data => {
+      returnData = data
     })
     .catch(err => {
-      return {
-        status: 'error',
-        response: err
-      }
+      returnData = err
     });
+  return returnData
 }
-
-// eslint-disable-next-line no-unused-vars
-function setStorageInfo(file, data) {
+export function setStorageInfo(file, data) {
   storage.set(file, JSON.stringify(data))
     .then(() => {
       return {

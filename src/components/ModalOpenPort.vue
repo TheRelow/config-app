@@ -8,7 +8,7 @@
             src="../assets/add.svg"
         />{{ title }}
       </button>
-      <v-btn @click="testConnection"> Test conection </v-btn>
+      <v-btn @click="connection"> Test conection </v-btn>
     </template>
     <v-card>
       <v-card-title> Подключение к устройству </v-card-title>
@@ -73,7 +73,6 @@
 
 <script>
 import { ipcRenderer } from "electron";
-
 import serialport from "serialport";
 import ModbusRTU from "modbus-serial";
 
@@ -109,11 +108,7 @@ export default {
   methods: {
     async onOk() {
       this.dialog = false;
-      ipcRenderer.send("port-selection");
-      ipcRenderer.once("port-response", (e, args) => {
-        console.log(e);
-        console.log(args);
-      });
+      this.connection()
     },
 
     // В твою задачу входит переписать эту функция в асинхронную
@@ -149,6 +144,27 @@ export default {
       })
 
     },
+    connection() {
+      let request = {
+        port: this.port,
+        baudRate: this.baudrate,
+        databits: this.databits,
+        parity: this.parity,
+        stopbits: this.stopbits,
+        timeout: 1000, // optional
+        protocol: "RTU",
+        address: this.address,
+        data: [
+          {
+            // FC4 "Read Input Registers"
+            type: "FC4",
+            address: 40000,
+            length: 1
+          },
+        ]
+      }
+      ipcRenderer.send("ui-request", request);
+    },
   },
 
   created() {
@@ -160,13 +176,17 @@ export default {
       });
 
       if (this.ports.length > 0) {
-        this.port = this.ports[this.ports.length-2];
+        this.port = this.ports[this.ports.length-1];
       }
     });
 
     if (this.protocols.length > 0) {
       this.protocol = this.protocols[0];
     }
+
+    ipcRenderer.on("ui-response", (e, args) => {
+      console.log(args);
+    });
   },
 };
 </script>

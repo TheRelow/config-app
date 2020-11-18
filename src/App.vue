@@ -72,9 +72,9 @@ export default {
   created() {
     this.$vuetify.theme.dark = true;
 
-    ipcRenderer.on("logInApp", (e, args) => {
-      console.log(e);
-      console.log(args);
+    ipcRenderer.on("messageToWin", (e, args) => {
+
+      console.log(args)
     });
   },
 };
