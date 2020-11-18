@@ -8,7 +8,7 @@
           src="../assets/add.svg"
         />{{ title }}
       </button>
-      <v-btn @click="connection"> Test conection </v-btn>
+<!--      <v-btn @click="connection"> Test conection </v-btn>-->
     </template>
     <v-card>
       <v-card-title> Подключение к устройству </v-card-title>
@@ -74,7 +74,6 @@
 <script>
 import { ipcRenderer } from "electron";
 import serialport from "serialport";
-import ModbusRTU from "modbus-serial";
 export default {
   name: "ModalOpenPort",
   props: ["title"],
@@ -97,39 +96,15 @@ export default {
       },
     };
   },
+  computed: {
+    connections () {
+      return this.$store.state.connections
+    }
+  },
   methods: {
     async onOk() {
       this.dialog = false;
       this.connection()
-    },
-    // В твою задачу входит переписать эту функция в асинхронную
-    //  промисами или через anync / await
-    testConnection() {
-      const client = new ModbusRTU();
-      client.connectRTUBuffered(this.port, {
-        baudRate: this.baudrate,
-        databits: this.databits,
-        parity: this.parity,
-        stopbits: this.stopbits,
-        autoOpen: false,
-      }).then((v)=>{
-        console.log(v)
-        if (client.isOpen) {
-          client.setID(this.address);
-          client.readInputRegisters(40000, 1, function (err, data) {
-            if (err) {
-              console.log(err);
-              client.close();
-            } else {
-              console.log(data);
-              client.close();
-            }
-          });
-        }
-      }).catch((v)=>{
-        client.close();
-        throw v
-      })
     },
     connection() {
       let request = {
@@ -141,16 +116,8 @@ export default {
         timeout: 1000, // optional
         protocol: "RTU",
         address: this.address,
-        data: [
-          {
-            // FC4 "Read Input Registers"
-            type: "FC4",
-            address: 40000,
-            length: 1
-          },
-        ]
       }
-      ipcRenderer.send("ui-request", request);
+      this.$store.commit('addConnection' , request)
     },
   },
   created() {

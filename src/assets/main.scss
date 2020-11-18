@@ -69,11 +69,13 @@
   flex-wrap: wrap;
   height: 100%;
   padding-left: 12px;
+  padding-right: 12px;
 }
 .x-row__item {
   position: relative;
   width: 18vw;
   height: 18vw;
+  margin-right: 1vw;
   border: 2px dashed #9898a4;
   color: #9898a4;
   border-radius: 5px;

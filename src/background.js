@@ -23,14 +23,14 @@ let cfg = {
 let cfgChanged = false
 
 function messageToWin(msg) {
-  if (win !== null && win != undefined) {
+  if (win !== null) {
     win.webContents.send('messageToWin', msg)
   } else {
     winMess.push(msg)
   }
 }
 function messageToWorker(msg) {
-  if (worker != null && worker != undefined) {
+  if (worker != null) {
     worker.webContents.send('messageToWorker', msg)
   } else {
     workerMess.push(msg)
@@ -198,7 +198,7 @@ ipcMain.on("window-minimize", () => {
 ipcMain.on("window-maximize", () => {
   win.maximize();
   cfg.maximized = true;
-  cfgChanged = true;
+  cfgChanged = true
 })
 
 ipcMain.on("window-unmaximize", () => {
@@ -215,8 +215,7 @@ ipcMain.on("window-close", () => {
 })
 
 ipcMain.on("port-selection", () => {
-  // eslint-disable-next-line no-unused-vars
-  const p = new Promise((resolve, reject) => {
+  new Promise((resolve) => {
     if (worker == null) {
       createWorkerWindow(() => {
         worker.webContents.send('port-selection', 'port selected')

@@ -45,7 +45,7 @@ html {
   overflow-x: hidden;
 }
 ::-webkit-scrollbar {
-  width: 0px; /* Remove scrollbar space */
+  width: 0; /* Remove scrollbar space */
   background: transparent; /* Optional: just make scrollbar invisible */
 }
 /* Optional: show position indicator in red */
@@ -69,6 +69,12 @@ export default {
 
   data: () => ({}),
 
+  computed: {
+    var () {
+      return this.$store.state.some
+    }
+  },
+
   created() {
     this.$vuetify.theme.dark = true;
 
@@ -76,6 +82,8 @@ export default {
 
       console.log(args)
     });
+
+    console.log(this.var)
   },
 };
 </script>
