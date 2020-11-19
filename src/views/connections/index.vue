@@ -13,7 +13,7 @@ import ModalOpenPort from "@/components/ModalOpenPort";
 import ComponentCard from "@/components/ComponentCard";
 
 export default {
-  name: "About",
+  name: "index",
 
   components: { ModalOpenPort, ComponentCard },
 
@@ -32,5 +32,9 @@ export default {
       ipcRenderer.send("click-from-renderer");
     },
   },
-};
+}
 </script>
+
+<style scoped>
+
+</style>

@@ -8,20 +8,8 @@
       <!-- -->
     </v-app-bar>
 
-    <v-navigation-drawer app floating mini-variant permanent>
+    <v-navigation-drawer app floating expand-on-hover permanent>
       <nav-bar />
-      <!-- <template v-slot:append>
-        <v-list dense nav>
-          <v-list-item v-for="item in items" :key="item.icon" link>
-            <v-list-item-icon>
-              <v-icon>{{ item.icon }}</v-icon>
-            </v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-title>{{ item.icon }}</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
-      </template>-->
     </v-navigation-drawer>
 
     <!-- Sizes your content based upon application components -->

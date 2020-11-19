@@ -1,10 +1,8 @@
 'use strict'
 
-// eslint-disable-next-line no-unused-vars
 import {app, protocol, BrowserWindow, screen, ipcMain} from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
-// eslint-disable-next-line no-unused-vars
 import { getStorageInfo, setStorageInfo } from './modules/ElectronStorage'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -19,7 +17,6 @@ let cfg = {
   height: null,
   maximized: null,
 }
-// eslint-disable-next-line no-unused-vars
 let cfgChanged = false
 
 function messageToWin(msg) {
