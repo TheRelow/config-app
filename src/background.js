@@ -17,6 +17,7 @@ let cfg = {
   height: null,
   maximized: null,
 }
+// eslint-disable-next-line no-unused-vars
 let cfgChanged = false
 
 function messageToWin(msg) {
