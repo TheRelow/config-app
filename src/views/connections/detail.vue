@@ -4,7 +4,7 @@
       back
     </router-link>
     <button to="/connections/detail" class="x-row__item" @click="connectionToPort">
-      msg
+      fc4
     </button>
   </div>
 </template>
