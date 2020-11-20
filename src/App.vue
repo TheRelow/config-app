@@ -67,11 +67,12 @@ export default {
     this.$vuetify.theme.dark = true;
 
     ipcRenderer.on("messageToWin", (e, args) => {
-
       console.log(args)
     });
-
     console.log(this.var)
+    ipcRenderer.on("ui-response", (e, args) => {
+      console.log(args);
+    });
   },
 };
 </script>

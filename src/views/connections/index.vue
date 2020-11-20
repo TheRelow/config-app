@@ -6,7 +6,6 @@
 </template>
 
 <script>
-import { ipcRenderer } from "electron";
 
 // @ is an alias to /src
 import ModalOpenPort from "@/components/ModalOpenPort";
@@ -15,22 +14,16 @@ import ComponentCard from "@/components/ComponentCard";
 export default {
   name: "index",
 
+  data: () => ({}),
+
+  props: [""],
+
   components: { ModalOpenPort, ComponentCard },
 
   computed: {
     connections () {
       return this.$store.state.connections
     }
-  },
-
-  props: [""],
-
-  data: () => ({}),
-
-  methods: {
-    onClick() {
-      ipcRenderer.send("click-from-renderer");
-    },
   },
 }
 </script>

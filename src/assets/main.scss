@@ -70,6 +70,14 @@
   height: 100%;
   padding-left: 12px;
   padding-right: 12px;
+  a.x-row__item {
+    color: #9898a4;
+    text-decoration: none;
+    font-size: 1.5rem;
+    &:hover {
+      color: #fff;
+    }
+  }
 }
 .x-row__item {
   display: flex;

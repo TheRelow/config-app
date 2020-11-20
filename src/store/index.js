@@ -5,14 +5,17 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    connections: [],
+    connections: {},
     openedConnections: []
   },
   mutations: {
     addConnection (state, payload) {
-      state.connections.push(payload)
+      Vue.set(state.connections, payload.port, payload)
     }
   },
   actions: {
-  }
+  },
+  getters: {
+    connections: s => s.connections,
+  },
 })

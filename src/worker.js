@@ -60,12 +60,20 @@ function processRequest(reg_request, message, client) {
 
 ipcRenderer.on('worker-request', (event, message) => {
 
+  let intervalEnters = 0;
+
   let timerId = setInterval(() => {
     ipcRenderer.send("worker-response", result)
     result.data = [];
+    if (intervalEnters++ > 4) {
+      clearInterval(timerId);
+      ipcRenderer.send("worker-response", "Timeout")
+    }
   }, message.timeout);
 
   const client = new ModbusRTU();
+
+  console.log(message)
 
   client.connectRTUBuffered(message.port, {
     baudRate: message.baudRate,
@@ -108,10 +116,15 @@ ipcRenderer.on('worker-request', (event, message) => {
         result.complete = false;
       }
     })
-    .catch((v)=>{
+    .catch(()=>{
       if (client.isOpen) {
         client.close();
       }
-      throw v
+      console.log('Доступ запрещен')
+      clearInterval(timerId);
+      result.complete = true;
+      ipcRenderer.send("worker-response", 'Доступ запрещен')
+      result.data = [];
+      result.complete = false;
     })
 })

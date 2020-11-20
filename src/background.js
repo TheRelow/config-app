@@ -6,8 +6,6 @@ import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import { getStorageInfo, setStorageInfo } from './modules/ElectronStorage'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
-let rem = BrowserWindow.remote;
-
 let win = null
 let worker = null
 let winMess = []
@@ -96,9 +94,6 @@ async function createMainWindow() {
     messageToWin(i)
   })
   winMess = []
-
-  let siz = rem.getSize()
-  messageToWin(siz)
 }
 
 async function createWorkerWindow(callback) {

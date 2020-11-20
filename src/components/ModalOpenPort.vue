@@ -72,7 +72,6 @@
 </template>
 
 <script>
-import { ipcRenderer } from "electron";
 import serialport from "serialport";
 export default {
   name: "ModalOpenPort",
@@ -117,6 +116,7 @@ export default {
         protocol: "RTU",
         address: this.address,
       }
+
       this.$store.commit('addConnection' , request)
     },
   },
@@ -133,9 +133,6 @@ export default {
     if (this.protocols.length > 0) {
       this.protocol = this.protocols[0];
     }
-    ipcRenderer.on("ui-response", (e, args) => {
-      console.log(args);
-    });
   },
 };
 </script>

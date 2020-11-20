@@ -1,5 +1,5 @@
 <template>
-  <router-link to="/connections/detail" class="x-row__item">
+  <router-link :to="'/connections/' + value.item.port" class="x-row__item">
     {{value.item.port}}
   </router-link>
 </template>

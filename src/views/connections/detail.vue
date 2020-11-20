@@ -1,9 +1,10 @@
 <template>
   <div>
-    <router-link to="/connections" class="x-row__item">
+    <router-link to="/connections">
       back
     </router-link>
-    <button to="/connections/detail" class="x-row__item" @click="connectionToPort">
+    <h1>{{port}}</h1>
+    <button class="x-row__item" @click="connectionToPort">
       fc4
     </button>
   </div>
@@ -13,9 +14,15 @@
 import { ipcRenderer } from "electron";
 export default {
   name: "detail",
+  data: () => ({
+    port: null
+  }),
+  async beforeCreate() {
+    this.port = await this.$route.params.port
+  },
   computed: {
     portData() {
-      return this.$store.state.connections[0]
+      return this.$store.state.connections[this.port]
     }
   },
   methods: {

@@ -24,7 +24,7 @@ const routes = [
         component: () => import(/* webpackChunkName: "docs-main" */ '../views/connections/index.vue'),
       },
       {
-        path: '/connections/detail',
+        path: '/connections/:port',
         name: 'detail',
         component: () => import(/* webpackChunkName: "docs-detail" */ '../views/connections/detail.vue'),
       },
