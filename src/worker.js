@@ -90,15 +90,15 @@ ipcRenderer.on('worker-request', (event, message) => {
             processRequest(value, message, client)
               .then((v)=>{
                 reg_value = v
-                console.log(reg_value)
                 result.data.push(reg_value);
                 resolve()
+                intervalEnters = 0
               })
               .catch((v)=>{
                 reg_value = v
-                console.log(reg_value)
                 result.data.push(reg_value);
                 resolve()
+                intervalEnters = 0
               })
           }
         }
@@ -108,23 +108,21 @@ ipcRenderer.on('worker-request', (event, message) => {
       })
     })
     .then(()=>{
-      clearInterval(timerId);
       if (result.data) {
         result.complete = true;
         ipcRenderer.send("worker-response", result)
-        result.data = [];
-        result.complete = false;
       }
     })
     .catch(()=>{
+      result.complete = true;
+      ipcRenderer.send("worker-response", 'Доступ запрещен')
+    })
+    .finally(()=>{
+      clearInterval(timerId);
+      result.data = [];
+      result.complete = false;
       if (client.isOpen) {
         client.close();
       }
-      console.log('Доступ запрещен')
-      clearInterval(timerId);
-      result.complete = true;
-      ipcRenderer.send("worker-response", 'Доступ запрещен')
-      result.data = [];
-      result.complete = false;
     })
 })
