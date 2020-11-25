@@ -1,7 +1,7 @@
 <template>
   <v-row class="x-row" align="center" justify="center">
     <ModalOpenPort title="Open Port" />
-    <ComponentCard v-for="(item, index) in connections" :key="item.port" :value="{item, index}" />
+    <ComponentCard v-for="(item, index) in connections" :key="item.fullPath" :value="{item, index}" />
   </v-row>
 </template>
 

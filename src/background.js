@@ -207,32 +207,6 @@ ipcMain.on("window-close", () => {
   })();
 })
 
-ipcMain.on("port-selection", () => {
-  new Promise((resolve) => {
-    if (worker == null) {
-      createWorkerWindow(() => {
-        worker.webContents.send('port-selection', 'port selected')
-      })
-        .then(()=>resolve())
-    } else {
-      worker.webContents.send('port-selection', 'port selected')
-      resolve()
-    }
-  })
-    .then(()=>{
-      let timer = setTimeout(()=>{
-        win.webContents.send('port-response', 'server timeOut')
-        ipcMain.removeListener('port-response', ()=>{
-        })
-      }, 1000)
-
-      ipcMain.on("port-response", () => {
-        clearTimeout(timer);
-        win.webContents.send('port-response', 'server response')
-      })
-    })
-})
-
 ipcMain.on("ui-request", (event, args) => {
   if (worker == null) {
     createWorkerWindow(() => {

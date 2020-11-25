@@ -7,11 +7,13 @@
   user-select: none;
   cursor: default;
 }
+
 .ui-titleicon {
   flex-grow: 1;
   max-width: 32px;
   max-height: 32px;
 }
+
 .ui-titletext {
   flex-grow: 2;
   max-height: 32px;
@@ -20,6 +22,7 @@
   text-indent: 10px;
   text-align: center;
 }
+
 #drag-region {
   top: 1px;
   left: 33px;
@@ -31,11 +34,13 @@
   -webkit-app-region: drag;
   /* background: rgba(0, 255, 255, 0.5); */
 }
+
 .ui-titlecontrols {
   max-width: 144px;
   max-height: 32px;
   flex-grow: 1;
 }
+
 .ui-btn {
   margin: 0;
   width: 48px;
@@ -44,17 +49,21 @@
   outline: 0;
   background: transparent;
 }
+
 .ui-btn:hover {
   background: rgba(255, 255, 255, 0.1);
 }
+
 .ui-btn.close:hover {
   background: #e81123;
 }
+
 .ui-btn svg path,
 .ui-btn svg rect,
 .ui-btn svg polygon {
   fill: rgba(255, 255, 255, 0.7);
 }
+
 .ui-btn svg {
   width: 10px;
   height: 10px;
@@ -70,15 +79,18 @@
   height: 100%;
   padding-left: 12px;
   padding-right: 12px;
+
   a.x-row__item {
     color: #9898a4;
     text-decoration: none;
     font-size: 1.5rem;
+
     &:hover {
       color: #fff;
     }
   }
 }
+
 .x-row__item {
   display: flex;
   justify-content: center;
@@ -92,11 +104,13 @@
   color: #9898a4;
   border-radius: 5px;
   transition: 0.2s ease;
+
   &:hover {
     color: #fff;
     border-color: #fff;
   }
 }
+
 .x-row__item-plus {
   display: block;
   width: 20%;
@@ -112,6 +126,7 @@
   .v-input__slot {
     margin-bottom: 0;
   }
+
   .v-messages {
     display: none;
   }
@@ -123,6 +138,7 @@
   right: 0;
   left: 0;
 }
+
 .ui-titlecontrols {
   position: relative;
   z-index: 1;

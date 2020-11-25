@@ -1,14 +1,7 @@
 <template>
   <v-dialog v-model="dialog" persistent max-width="400">
     <template v-slot:activator="{ on, attrs }">
-      <button class="x-row__item" v-bind="attrs" v-on="on">
-        <img
-          alt="plus icon"
-          class="x-row__item-plus"
-          src="../assets/add.svg"
-        />{{ title }}
-      </button>
-<!--      <v-btn @click="connection"> Test conection </v-btn>-->
+      <v-btn v-bind="attrs" v-on="on"> +NEW </v-btn>
     </template>
     <v-card>
       <v-card-title> Подключение к устройству </v-card-title>
@@ -43,18 +36,18 @@
         <v-row>
           <v-col cols="8">
             <v-select
-                v-model="protocol"
-                :items="protocols"
-                required
-                label="Протокол"
+              v-model="protocol"
+              :items="protocols"
+              required
+              label="Протокол"
             />
           </v-col>
           <v-col cols="4">
             <v-text-field
-                v-model="address"
-                :rules="[numberRule]"
-                required
-                label="Адрес"
+              v-model="address"
+              :rules="[numberRule]"
+              required
+              label="Адрес"
             />
           </v-col>
         </v-row>
@@ -96,14 +89,14 @@ export default {
     };
   },
   computed: {
-    connections () {
-      return this.$store.state.connections
-    }
+    connections() {
+      return this.$store.state.connections;
+    },
   },
   methods: {
     async onOk() {
       this.dialog = false;
-      this.connection()
+      this.connection();
     },
     connection() {
       let request = {
@@ -115,19 +108,19 @@ export default {
         timeout: 1000, // optional
         protocol: "RTU",
         address: this.address,
-      }
+        fullPath: this.port + "/" + this.address,
+      };
 
-      this.$store.commit('addConnection' , request)
+      this.$store.commit("addConnection", request);
     },
   },
   created() {
     serialport.list().then((portslist) => {
       portslist.forEach((item) => {
         this.ports.push(item.path);
-        console.log(item);
       });
       if (this.ports.length > 0) {
-        this.port = this.ports[this.ports.length-1];
+        this.port = this.ports[this.ports.length - 1];
       }
     });
     if (this.protocols.length > 0) {
