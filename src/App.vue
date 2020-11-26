@@ -57,21 +57,15 @@ export default {
 
   data: () => ({}),
 
-  computed: {
-    var () {
-      return this.$store.state.some
-    }
-  },
-
   created() {
     this.$vuetify.theme.dark = true;
 
     ipcRenderer.on("messageToWin", (e, args) => {
       console.log(args)
     });
-    console.log(this.var)
     ipcRenderer.on("ui-response", (e, args) => {
-      console.log(args);
+      console.log('args', args)
+      this.$store.commit("addData", args);
     });
   },
 };

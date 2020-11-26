@@ -14,19 +14,19 @@ const routes = [
     path: '/connections',
     name: 'Connections',
     // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
+    // this generates a separate chunk (connections.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "connections" */ '../views/Connections.vue'),
     children: [
       {
         path: '/',
         name: 'main',
-        component: () => import(/* webpackChunkName: "docs-main" */ '../views/connections/index.vue'),
+        component: () => import(/* webpackChunkName: "connections-main" */ '../views/connections/index.vue'),
       },
       {
-        path: '/connections/:port',
+        path: '/connections/:fullPath',
         name: 'detail',
-        component: () => import(/* webpackChunkName: "docs-detail" */ '../views/connections/detail.vue'),
+        component: () => import(/* webpackChunkName: "connections-detail" */ '../views/connections/detail.vue'),
       },
     ]
   },
@@ -34,7 +34,7 @@ const routes = [
     path: '/table',
     name: 'table',
     // route level code-splitting
-    // this generates a separate chunk (table.[hash].js) for this route
+    // this generates a separate chunk (PageTable.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "table" */ '../views/PageTable.vue')
   }

@@ -9,7 +9,13 @@ let result = {
 
 function processRequest(reg_request, message, client) {
 
+  console.log('message', message)
+  console.log('reg_request', reg_request)
+
   let reg_result = {
+    port: message.port,
+    portAddress: message.address,
+    fullPath: message.fullPath,
     type: reg_request.type,
     address: reg_request.address
   };
@@ -60,6 +66,8 @@ function processRequest(reg_request, message, client) {
 
 ipcRenderer.on('worker-request', (event, message) => {
 
+  const client = new ModbusRTU();
+
   let intervalEnters = 0;
 
   let timerId = setInterval(() => {
@@ -68,10 +76,11 @@ ipcRenderer.on('worker-request', (event, message) => {
     if (intervalEnters++ > 4) {
       clearInterval(timerId);
       ipcRenderer.send("worker-response", "Timeout")
+      if (client.isOpen) {
+        client.close();
+      }
     }
   }, message.timeout);
-
-  const client = new ModbusRTU();
 
   console.log(message)
 
@@ -86,6 +95,7 @@ ipcRenderer.on('worker-request', (event, message) => {
       return new Promise((resolve)=>{
         try {
           for (let value of message.data) {
+            console.log('message', message)
             let reg_value = null;
             processRequest(value, message, client)
               .then((v)=>{
@@ -116,6 +126,14 @@ ipcRenderer.on('worker-request', (event, message) => {
     .catch(()=>{
       result.complete = true;
       ipcRenderer.send("worker-response", 'Доступ запрещен')
+      if (client.isOpen) {
+        client.close();
+      }
+    })
+    .then(()=>{
+      if (client.isOpen) {
+        client.close();
+      }
     })
     .finally(()=>{
       clearInterval(timerId);

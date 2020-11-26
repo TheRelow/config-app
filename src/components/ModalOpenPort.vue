@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" persistent max-width="400">
+  <v-dialog v-model="dialog" @keydown.esc="dialog = false" @keydown.enter="logg" persistent max-width="400">
     <template v-slot:activator="{ on, attrs }">
       <v-btn v-bind="attrs" v-on="on"> +NEW </v-btn>
     </template>
@@ -94,7 +94,11 @@ export default {
     },
   },
   methods: {
-    async onOk() {
+    logg() {
+      console.log(123)
+      this.dialog = false;
+    },
+    onOk() {
       this.dialog = false;
       this.connection();
     },
@@ -108,10 +112,11 @@ export default {
         timeout: 1000, // optional
         protocol: "RTU",
         address: this.address,
-        fullPath: this.port + "/" + this.address,
+        fullPath: this.port + "_" + this.address,
       };
 
       this.$store.commit("addConnection", request);
+      console.log("addConnection", request)
     },
   },
   created() {

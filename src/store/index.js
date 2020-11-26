@@ -10,7 +10,12 @@ export default new Vuex.Store({
   },
   mutations: {
     addConnection (state, payload) {
-      Vue.set(state.connections, payload.port, payload)
+      Vue.set(state.connections, payload.fullPath, payload)
+    },
+    addData (state, payload) {
+      for (let i of payload.data) {
+        Vue.set(state.connections[i.fullPath], 'data', i.value)
+      }
     }
   },
   actions: {

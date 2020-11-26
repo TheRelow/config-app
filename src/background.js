@@ -203,7 +203,7 @@ ipcMain.on("window-unmaximize", () => {
 ipcMain.on("window-close", () => {
   (async ()=>{
     await setStorageInfo('cfg.json', cfg)
-    win.close();
+    win.close()
   })();
 })
 

@@ -3,42 +3,43 @@
     <router-link to="/connections">
       back
     </router-link>
-    <h1>{{port}}</h1>
-    <button class="x-row__item" @click="connectionToPort">
-      fc4
-    </button>
+    <h1>{{fullPath}}</h1>
+    <v-btn  @click="connectionToPort"> update data </v-btn>
+    <ComponentPortfolioInfo :value="portData.data"></ComponentPortfolioInfo>
   </div>
 </template>
 
 <script>
 import { ipcRenderer } from "electron";
+import ComponentPortfolioInfo from "@/components/ComponentPortInfo";
 export default {
   name: "detail",
   data: () => ({
-    port: null
   }),
-  async beforeCreate() {
-    this.port = await this.$route.params.port
+  components: { ComponentPortfolioInfo },
+  beforeCreate() {
+    this.fullPath = this.$route.params.fullPath
   },
   computed: {
     portData() {
-      return this.$store.state.connections[this.port]
+      return this.$store.state.connections[this.fullPath]
     }
   },
   methods: {
     connectionToPort() {
+      console.log(this.portData)
       let request = {
         port: this.portData.port,
+        fullPath: this.fullPath,
         baudRate: this.portData.baudRate,
         databits: this.portData.databits,
         parity: this.portData.parity,
         stopbits: this.portData.stopbits,
-        timeout: 1000, // optional
+        timeout: 1000,
         protocol: "RTU",
         address: this.portData.address,
         data: [
           {
-            // FC4 "Read Input Registers"
             type: "FC4",
             address: 40000,
             length: 1
@@ -47,6 +48,14 @@ export default {
       }
       ipcRenderer.send("ui-request", request);
     },
+    logg() {
+      console.log(this.portData)
+    }
+  },
+  created() {
+    if (!this.portData.data) {
+      this.connectionToPort();
+    }
   }
 }
 </script>
