@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" @keydown.esc="dialog = false" @keydown.enter="logg" persistent max-width="400">
+  <v-dialog v-model="dialog" @keydown.esc="onOk" @keydown.enter="onOk" persistent max-width="400">
     <template v-slot:activator="{ on, attrs }">
       <v-btn v-bind="attrs" v-on="on"> +NEW </v-btn>
     </template>
@@ -99,10 +99,12 @@ export default {
       this.dialog = false;
     },
     onOk() {
+      console.log('ok')
       this.dialog = false;
       this.connection();
     },
     connection() {
+      console.log('connection')
       let request = {
         port: this.port,
         baudRate: this.baudrate,
@@ -131,6 +133,11 @@ export default {
     if (this.protocols.length > 0) {
       this.protocol = this.protocols[0];
     }
+    window.addEventListener('keyup', (e)=>{
+      if (e.keyCode === 13) {
+        // console.log(123)
+      }
+    })
   },
 };
 </script>

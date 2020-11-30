@@ -1,6 +1,11 @@
 <template>
   <div>
-    data: {{value.data[0]}}
+    <span v-if="portData.data">
+      data: {{portData.data.data[0]}}
+    </span>
+    <span v-else>
+      empty
+    </span>
   </div>
 </template>
 
@@ -8,9 +13,17 @@
 
 export default {
   name: "ComponentPortInfo",
-  props: ['value'],
+  props: ['fullPath'],
+  computed: {
+    portData() {
+      return this.$store.state.connections[this.fullPath]
+    }
+  },
+  beforeCreate() {
+  },
   created() {
-    console.log(this.value)
+    console.log(this.portData)
+    console.log(this.fullPath)
   }
 }
 </script>

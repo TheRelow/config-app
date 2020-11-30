@@ -4,19 +4,19 @@
       back
     </router-link>
     <h1>{{fullPath}}</h1>
-    <v-btn  @click="connectionToPort"> update data </v-btn>
-    <ComponentPortfolioInfo :value="portData.data"></ComponentPortfolioInfo>
+    <v-btn @click="connectionToPort"> update data </v-btn>
+    <ComponentPortInfo :fullPath="this.fullPath"></ComponentPortInfo>
   </div>
 </template>
 
 <script>
 import { ipcRenderer } from "electron";
-import ComponentPortfolioInfo from "@/components/ComponentPortInfo";
+import ComponentPortInfo from "@/components/ComponentPortInfo";
 export default {
   name: "detail",
   data: () => ({
   }),
-  components: { ComponentPortfolioInfo },
+  components: { ComponentPortInfo },
   beforeCreate() {
     this.fullPath = this.$route.params.fullPath
   },
@@ -27,7 +27,6 @@ export default {
   },
   methods: {
     connectionToPort() {
-      console.log(this.portData)
       let request = {
         port: this.portData.port,
         fullPath: this.fullPath,
@@ -47,9 +46,6 @@ export default {
         ]
       }
       ipcRenderer.send("ui-request", request);
-    },
-    logg() {
-      console.log(this.portData)
     }
   },
   created() {

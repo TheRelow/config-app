@@ -58,6 +58,7 @@ async function createMainWindow() {
   win = new BrowserWindow({
     width: cfg.width,
     height: cfg.height,
+    backgroundColor: '#121212',
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
@@ -67,6 +68,9 @@ async function createMainWindow() {
   })
 
   win.setMenu(null);
+  if (cfg.maximized) {
+    win.maximize();
+  }
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -82,7 +86,17 @@ async function createMainWindow() {
   win.on("resize", () => {
     if (win !== null) win.webContents.send('window-resize', win.isMaximized());
 
-    messageToWin(typeof win.webContents.getAllWebContents)
+    let size   = win.getSize();
+    let wSize = {
+      height: size[1],
+      width: size[0]
+    }
+    cfg.maximized = false
+    cfg.height = wSize.height
+    cfg.width = wSize.width
+    cfgChanged = true
+
+    messageToWin(wSize)
   });
 
   win.on('closed', () => {
@@ -144,7 +158,7 @@ app.on('window-all-closed', () => {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') {
-    app.quit()
+    app.quit();
   }
 })
 
@@ -191,7 +205,7 @@ ipcMain.on("window-minimize", () => {
 ipcMain.on("window-maximize", () => {
   win.maximize();
   cfg.maximized = true;
-  cfgChanged = true
+  cfgChanged = true;
 })
 
 ipcMain.on("window-unmaximize", () => {
@@ -202,8 +216,10 @@ ipcMain.on("window-unmaximize", () => {
 
 ipcMain.on("window-close", () => {
   (async ()=>{
-    await setStorageInfo('cfg.json', cfg)
-    win.close()
+    if (cfgChanged) {
+      await setStorageInfo('cfg.json', cfg)
+    }
+    win.close();
   })();
 })
 

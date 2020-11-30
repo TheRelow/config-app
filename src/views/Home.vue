@@ -17,7 +17,8 @@
         :reverse-transition="false"
       >
         <v-container fluid>
-          <div class="body-2 my-6">{{ item.port }} @ {{ item.address }}</div></v-container
+          <ComponentPortInfo :fullPath="item.fullPath"></ComponentPortInfo>
+        </v-container
         >
       </v-tab-item>
     </v-tabs>
@@ -27,11 +28,12 @@
 <script>
 // @ is an alias to /src
 import ModalOpenPort from "@/components/ModalOpenPort";
+import ComponentPortInfo from "@/components/ComponentPortInfo";
 
 export default {
   name: "Home",
 
-  components: { ModalOpenPort },
+  components: { ModalOpenPort, ComponentPortInfo },
 
   computed: {
     connections() {
