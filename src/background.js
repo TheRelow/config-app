@@ -1,15 +1,15 @@
 'use strict'
 
-import {app, protocol, BrowserWindow, screen, ipcMain} from 'electron'
-import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
-import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
-import { getStorageInfo, setStorageInfo } from './modules/ElectronStorage'
-const isDevelopment = process.env.NODE_ENV !== 'production'
+import {app, protocol, BrowserWindow, screen, ipcMain} from 'electron';
+import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
+import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
+import { getStorageInfo, setStorageInfo } from './modules/ElectronStorage';
+const isDevelopment = process.env.NODE_ENV !== 'production';
 
-let win = null
-let worker = null
-let winMess = []
-let workerMess = []
+let win = null;
+let worker = null;
+let winMess = [];
+let workerMess = [];
 let cfg = {
   width: null,
   height: null,
@@ -86,7 +86,7 @@ async function createMainWindow() {
   win.on("resize", () => {
     if (win !== null) win.webContents.send('window-resize', win.isMaximized());
 
-    let size   = win.getSize();
+    let size   = win.getSize()
     let wSize = {
       height: size[1],
       width: size[0]
@@ -96,7 +96,7 @@ async function createMainWindow() {
     cfg.width = wSize.width
     cfgChanged = true
 
-    messageToWin(wSize)
+    messageToWin(wSize);
   });
 
   win.on('closed', () => {
@@ -144,7 +144,7 @@ async function createWorkerWindow(callback) {
   workerMess.forEach((i)=>{
     messageToWorker(i)
   })
-  workerMess = []
+  workerMess = [];
 }
 
 
@@ -205,7 +205,7 @@ ipcMain.on("window-minimize", () => {
 ipcMain.on("window-maximize", () => {
   win.maximize();
   cfg.maximized = true;
-  cfgChanged = true;
+  cfgChanged = true
 })
 
 ipcMain.on("window-unmaximize", () => {

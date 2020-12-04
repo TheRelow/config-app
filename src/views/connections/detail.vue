@@ -6,6 +6,13 @@
     <h1>{{fullPath}}</h1>
     <v-btn @click="connectionToPort"> update data </v-btn>
     <ComponentPortInfo :fullPath="this.fullPath"></ComponentPortInfo>
+    <v-row justify="space-around">
+      <v-date-picker
+        v-model="picker"
+        color="green lighten-1"
+      ></v-date-picker>
+    </v-row>
+    {{formatedDate}}
   </div>
 </template>
 
@@ -15,6 +22,7 @@ import ComponentPortInfo from "@/components/ComponentPortInfo";
 export default {
   name: "detail",
   data: () => ({
+    picker: new Date().toISOString().substr(0, 10),
   }),
   components: { ComponentPortInfo },
   beforeCreate() {
@@ -23,6 +31,9 @@ export default {
   computed: {
     portData() {
       return this.$store.state.connections[this.fullPath]
+    },
+    formatedDate() {
+      return new Date(this.picker).getTime()
     }
   },
   methods: {
@@ -42,6 +53,21 @@ export default {
             type: "FC4",
             address: 40000,
             length: 1
+          },
+          {
+            type: "FC3",
+            address: 30000,
+            length: 2
+          },
+          {
+            type: "write",
+            address: 30000,
+            value: this.formatedDate
+          },
+          {
+            type: "FC3",
+            address: 30000,
+            length: 2
           },
         ]
       }

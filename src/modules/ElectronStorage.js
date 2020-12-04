@@ -11,6 +11,7 @@ export async function getStorageInfo(file) {
     });
   return returnData
 }
+
 export function setStorageInfo(file, data) {
   storage.set(file, JSON.stringify(data))
     .then(() => {
