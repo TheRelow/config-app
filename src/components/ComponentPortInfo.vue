@@ -1,6 +1,6 @@
 <template>
   <div>
-    <span v-if="portData.data">
+    <span v-if="portData.date">
       data: {{date}}
     </span>
     <span v-else>
@@ -14,19 +14,30 @@
 export default {
   name: "ComponentPortInfo",
   props: ['fullPath'],
+  methods: {
+    logg() {
+      console.log(this.portData)
+    },
+    logg2() {
+      console.log(this.date)
+    }
+  },
   computed: {
     portData() {
       return this.$store.state.connections[this.fullPath]
     },
     date() {
-      return new Date(((this.portData.data.data[0] << 16) + this.portData.data.data[1]) * 1000)
+      return new Date(this.portData.date)
     }
   },
   beforeCreate() {
   },
   created() {
-    console.log(this.portData)
-    console.log(this.fullPath)
+    if (this.portData.port) {
+      this.$store.commit("addDate", {
+        fullPath: this.portData.fullPath
+      });
+    }
   }
 }
 </script>

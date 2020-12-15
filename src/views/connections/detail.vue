@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { ipcRenderer } from "electron";
+// import { ipcRenderer } from "electron";
 import ComponentPortInfo from "@/components/ComponentPortInfo";
 export default {
   name: "detail",
@@ -39,44 +39,30 @@ export default {
   methods: {
     connectionToPort() {
       let request = {
-        port: this.portData.port,
         fullPath: this.fullPath,
-        baudRate: this.portData.baudRate,
-        databits: this.portData.databits,
-        parity: this.portData.parity,
-        stopbits: this.portData.stopbits,
-        timeout: 1000,
-        protocol: "RTU",
-        address: this.portData.address,
         data: [
           {
-            type: "FC4",
-            address: 40000,
-            length: 1
-          },
-          {
-            type: "FC3",
-            address: 30000,
-            length: 2
-          },
-          {
-            type: "write",
+            type: "read",
             address: 30000,
             value: this.formatedDate
           },
           {
-            type: "FC3",
+            type: "read",
             address: 30000,
-            length: 2
+            value: this.formatedDate
+          },
+          {
+            type: "readTime"
           },
         ]
       }
-      ipcRenderer.send("ui-request", request);
+      // ipcRenderer.send("ui-request", request);
+      this.$store.commit("requestData", request);
     }
   },
   created() {
     if (!this.portData.data) {
-      this.connectionToPort();
+      // this.connectionToPort();
     }
   }
 }

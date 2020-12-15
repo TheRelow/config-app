@@ -65,7 +65,7 @@ export default {
     });
     ipcRenderer.on("ui-response", (e, args) => {
       console.log('args', args)
-      this.$store.commit("addData", args);
+      // this.$store.commit("addData", args);
     });
   },
 };

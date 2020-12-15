@@ -65,7 +65,8 @@
 </template>
 
 <script>
-import serialport from "serialport";
+const axios = require('axios').default;
+
 export default {
   name: "ModalOpenPort",
   props: ["title"],
@@ -122,14 +123,19 @@ export default {
     },
   },
   created() {
-    serialport.list().then((portslist) => {
-      portslist.forEach((item) => {
-        this.ports.push(item.path);
-      });
-      if (this.ports.length > 0) {
-        this.port = this.ports[this.ports.length - 1];
-      }
-    });
+    axios.get('http://localhost:1337/portlist')
+      .then((response)=>{
+        console.log(response.data);
+        response.data.forEach((item) => {
+          this.ports.push(item.path);
+        });
+        if (this.ports.length > 0) {
+          this.port = this.ports[this.ports.length - 1];
+        }
+      })
+    .catch((e)=>{
+      console.log('error:', e)
+    })
     if (this.protocols.length > 0) {
       this.protocol = this.protocols[0];
     }

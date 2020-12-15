@@ -5,11 +5,13 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import { getStorageInfo, setStorageInfo } from './modules/ElectronStorage';
 const isDevelopment = process.env.NODE_ENV !== 'production';
+import MainServer from './server';
+
+// eslint-disable-next-line no-unused-vars
+let mainServer = new MainServer;
 
 let win = null;
-let worker = null;
 let winMess = [];
-let workerMess = [];
 let cfg = {
   width: null,
   height: null,
@@ -23,13 +25,6 @@ function messageToWin(msg) {
     win.webContents.send('messageToWin', msg)
   } else {
     winMess.push(msg)
-  }
-}
-function messageToWorker(msg) {
-  if (worker != null) {
-    worker.webContents.send('messageToWorker', msg)
-  } else {
-    workerMess.push(msg)
   }
 }
 
@@ -101,7 +96,6 @@ async function createMainWindow() {
 
   win.on('closed', () => {
     win = null
-    worker = null;
   })
 
   winMess.forEach((i)=>{
@@ -109,44 +103,6 @@ async function createMainWindow() {
   })
   winMess = []
 }
-
-async function createWorkerWindow(callback) {
-  // Create the worker window.
-  worker = new BrowserWindow({
-    webPreferences: {
-      parent: win,
-      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION
-    }
-  })
-
-  // feel90d: Should stay here, BEFORE worker.loadURL
-  worker.webContents.on('did-finish-load', () => {
-    if (typeof callback == 'function') {
-      callback();
-    }
-  })
-
-  if (process.env.WEBPACK_DEV_SERVER_URL) {
-    // and worker
-    await worker.loadURL(process.env.WEBPACK_DEV_SERVER_URL + "worker.html")
-
-    if (!process.env.IS_TEST) worker.webContents.openDevTools()
-  } else {
-    // Load worker
-    worker.loadURL('app://./worker.html')
-  }
-
-  // set to null
-  worker.on('closed', () => {
-    worker = null;
-  });
-
-  workerMess.forEach((i)=>{
-    messageToWorker(i)
-  })
-  workerMess = [];
-}
-
 
 // feel90d: Serial port will NOT work in renderer WITHOUT this line.
 app.allowRendererProcessReuse = false;
@@ -221,17 +177,4 @@ ipcMain.on("window-close", () => {
     }
     win.close();
   })();
-})
-
-ipcMain.on("ui-request", (event, args) => {
-  if (worker == null) {
-    createWorkerWindow(() => {
-      worker.webContents.send('worker-request', args);
-    })
-  } else {
-    worker.webContents.send('worker-request', args);
-  }
-})
-ipcMain.on("worker-response", (event, args) => {
-  win.webContents.send('ui-response', args);
 })
