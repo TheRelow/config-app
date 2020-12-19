@@ -1,4 +1,4 @@
-import {connect, readTime, close, read} from "@/modules/worker";
+import {connect, readTime, close, read, write, unixTimeToBit} from "@/modules/worker";
 
 const express = require('express');
 const cors = require('cors')
@@ -8,6 +8,11 @@ serv.use(express.json());
 const serialport = require("serialport");
 
 let connections = {}
+
+// eslint-disable-next-line no-unused-vars
+let registers = {
+
+}
 
 export default class MainServer {
   constructor() {
@@ -29,33 +34,63 @@ export default class MainServer {
       res.send(req.body)
     })
 
-    serv.post('/request-data', (req, res)=>{
-      let answer = []
+    serv.post('/data-transfer', (req, res)=>{
+      let answer = {}
+      answer[req.body.fullPath] = {}
       // eslint-disable-next-line no-unused-vars
       let connection = connect({
         port: connections[req.body.fullPath].port
       })
       req.body.data.forEach((i)=>{
+        // eslint-disable-next-line no-unused-vars
+        let length = 1
+        if (i["length"]) {
+          length = +i["length"]
+        }
         if (i.type == "read") {
-          let answerItem = {}
-          answerItem.type = i.type
-          answerItem.address = i.address
-          connection = connection.then(()=>read(i.address))
+          connection = connection.then(()=>read(i.address, length))
           connection = connection.then((data) => {
-            answerItem.answer = data.toString()
-            answer.push(answerItem)
+            console.log('read data', data)
+            if (length <= 1) {
+              answer[req.body.fullPath][i.address] = data
+            } else {
+              for (let k in data) {
+                if (Array.isArray(data[k]) && data[k].length == 1) {
+                  console.log('arr')
+                  answer[req.body.fullPath][k] = data[k][0]
+                } else {
+                  console.log('not arr')
+                  answer[req.body.fullPath][k] = data[k]
+                }
+              }
+            }
           })
         } else if (i.type == "readTime") {
-          let answerItem = {}
-          answerItem.type = i.type
           connection = connection.then(()=>readTime())
           connection = connection.then((data) => {
-            answerItem.answer = data.toString()
-            answer.push(answerItem)
+            answer[req.body.fullPath]["date"] = data
+          })
+        } else if (i.type == "write") {
+          connection = connection.then(()=>write(i.address, i.value))
+          connection = connection.then(() => {
+            answer[req.body.fullPath][i.address] = i.value
+          })
+        } else if (i.type == "writeTime") {
+          let address = 30000
+          if (i.address) {
+            address = i.address
+          }
+          let date = unixTimeToBit(i.value)
+          connection = connection.then(()=>write(address, date))
+          connection = connection.then(() => {
+            answer[req.body.fullPath]["date"] = i.value
           })
         }
       })
       connection = connection.finally(()=>{
+        for (let i in answer) {
+          registers[i] = answer[i]
+        }
         res.send(answer)
         close()
       })

@@ -18,17 +18,21 @@ export function unixTimeToBit(unixTime) {
 }
 
 export function connect(params) {
-  return client.connectRTUBuffered(params.port || 'COM4', { baudRate: params.baudRatel || 9600 })
-    .then(()=>{
-      client.setID(params.address || 247);
-    })
+  if (params) {
+    return client.connectRTUBuffered(params.port, { baudRate: params.baudRate || 9600 })
+      .then(()=>{
+        client.setID(params.address || 247);
+      })
+  }
 }
 
 export function write(address = 30000, data = null) {
   if (data) {
     return new Promise(resolve => {
+      console.log(`writing ${data} in ${address}`)
       client.writeRegisters(address, data)
         .then((k)=>{
+          console.log('success')
           resolve(k)
         })
         .catch((e)=>{
@@ -42,17 +46,56 @@ export function write(address = 30000, data = null) {
 }
 
 export function readFc4(address = 40000, length = 1) {
+  if (length <= 1) {
+    return new Promise(resolve => {
+      client.readInputRegisters(address, length)
+        .then((data)=>{
+          console.log(address + ' :', data)
+          resolve(data.data)
+        })
+        .catch((e)=>{
+          // console.log('error in ' + address + ' :', e)
+          console.log(address + ' : empty')
+          resolve(e)
+        })
+    })
+  }
   return new Promise(resolve => {
-    client.readInputRegisters(address, length)
-      .then((data)=>{
-        console.log(address + ' :', data)
-        resolve(data.data)
+    let answer = {
+    }
+    let first = address
+    // eslint-disable-next-line no-unused-vars
+    let connection = null
+    connection = client.readInputRegisters(address, 1)
+    connection = connection.then((data)=>{
+      answer[first] = data.data
+      console.log(first + ':', data)
+    })
+    for (let i = address; i < address + length; i++) {
+      connection = connection.then(()=>{
+        return new Promise((res)=> {
+          client.readInputRegisters(i, 1)
+            .then(function (data) {
+              answer[i] = data.data
+              console.log(i + ':', data)
+              res()
+            })
+            .catch(()=>{
+              answer[i] = 'empty'
+              console.log(i + ': empty')
+              res()
+            })
+        })
       })
-      .catch((e)=>{
-        // console.log('error in ' + address + ' :', e)
-        console.log(address + ' : empty')
-        resolve()
-      })
+    }
+    connection = connection.catch(()=>{
+      console.log('some error')
+      resolve(answer)
+    })
+    connection = connection.finally(()=>{
+      console.log(answer)
+      resolve(answer)
+    })
   })
 }
 
@@ -66,7 +109,7 @@ export function readFc3(address = 40000, length = 1) {
       .catch((e)=>{
         // console.log('error in ' + address + ' :', e)
         console.log(address + ' : empty')
-        resolve()
+        resolve(e)
       })
   })
 }
@@ -82,7 +125,7 @@ export function readTime(address = 30000, length = 2) {
       .catch((e)=>{
         // console.log('error in ' + address + ' :', e)
         console.log(address + ' : empty')
-        resolve()
+        resolve(e)
       })
   })
 }

@@ -7,13 +7,17 @@ const axios = require('axios').default;
 
 export default new Vuex.Store({
   state: {
-    connections: {}
+    connections: {},
+    registers: {}
   },
   mutations: {
-    requestData (state, payload) {
-      axios.post('http://localhost:1337/request-data', payload)
-        .then((k)=>{
-          console.log('request-data', k)
+    dataTransfer (state, payload) {
+      axios.post('http://localhost:1337/data-transfer', payload)
+        .then((answer)=>{
+          console.log('data-transfer', answer)
+          for (let i in answer.data) {
+            Vue.set(state.registers, i, answer.data[i])
+          }
         })
       // Vue.set(state.connections, payload.fullPath, payload)
     },
