@@ -24,12 +24,12 @@ export default class MainServer {
 
     serv.post('/new-connection', (req, res)=>{
       if (req.body.fullPath) {
-        console.log('fullPath in request body defined')
+        // fullPath in request body defined
         connections[req.body.fullPath] = req.body
       } else if (req.query.fullPath) {
-        console.log('fullPath in query params defined')
+        // fullPath in query params defined
       } else {
-        console.log('fullPath is not defined')
+        // fullPath is not defined
       }
       res.send(req.body)
     })
@@ -47,21 +47,15 @@ export default class MainServer {
         if (i["length"]) {
           length = +i["length"]
         }
-        if (i.type == "read") {
+        if (i.type == "read" || !i.type) {
           connection = connection.then(()=>read(i.address, length))
           connection = connection.then((data) => {
-            console.log('read data', data)
+            console.log('data', data)
             if (length <= 1) {
               answer[req.body.fullPath][i.address] = data
             } else {
-              for (let k in data) {
-                if (Array.isArray(data[k]) && data[k].length == 1) {
-                  console.log('arr')
-                  answer[req.body.fullPath][k] = data[k][0]
-                } else {
-                  console.log('not arr')
-                  answer[req.body.fullPath][k] = data[k]
-                }
+              for (let k of data) {
+                answer[req.body.fullPath][i.address++] = k
               }
             }
           })
@@ -73,6 +67,9 @@ export default class MainServer {
         } else if (i.type == "write") {
           connection = connection.then(()=>write(i.address, i.value))
           connection = connection.then(() => {
+            answer[req.body.fullPath][i.address] = i.value
+          })
+          connection = connection.catch(() => {
             answer[req.body.fullPath][i.address] = i.value
           })
         } else if (i.type == "writeTime") {
@@ -91,6 +88,7 @@ export default class MainServer {
         for (let i in answer) {
           registers[i] = answer[i]
         }
+        console.log(answer)
         res.send(answer)
         close()
       })

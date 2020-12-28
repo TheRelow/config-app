@@ -16,10 +16,7 @@
         :transition="false"
         :reverse-transition="false"
       >
-        <v-container fluid>
-          <ComponentPortInfo :fullPath="item.fullPath"></ComponentPortInfo>
-        </v-container
-        >
+        ?
       </v-tab-item>
     </v-tabs>
   </div>
@@ -28,12 +25,11 @@
 <script>
 // @ is an alias to /src
 import ModalOpenPort from "@/components/ModalOpenPort";
-import ComponentPortInfo from "@/components/ComponentPortInfo";
 
 export default {
   name: "Home",
 
-  components: { ModalOpenPort, ComponentPortInfo },
+  components: { ModalOpenPort },
 
   computed: {
     connections() {

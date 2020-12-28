@@ -5,7 +5,6 @@
     </router-link>
     <h1>{{fullPath}}</h1>
 <!--    <v-btn @click="connectionToPort"> update data </v-btn>-->
-    <ComponentPortInfo :fullPath="this.fullPath"></ComponentPortInfo>
     <v-row justify="space-around">
       <v-dialog
         ref="dialog"
@@ -67,16 +66,47 @@
 <!--          ></v-switch>-->
         </v-toolbar>
       </template>
+      <template v-slot:item.value="props">
+        <v-edit-dialog v-if="props.item.access == 'rw'"
+          :return-value.sync="props.item.value"
+          large
+          persistent
+          @save="save(props.item)"
+          @cancel="cancel"
+          @open="open"
+          @close="close"
+        >
+          <div>{{ props.item.value }}</div>
+          <template v-slot:input>
+            <div class="mt-4 title">
+              Update value
+            </div>
+            <v-text-field
+              v-model="props.item.value"
+              :rules="[max25chars]"
+              label="Edit"
+              single-line
+              counter
+              autofocus
+            ></v-text-field>
+          </template>
+        </v-edit-dialog>
+        <span v-else>{{ props.item.value }}</span>
+      </template>
     </v-data-table>
   </div>
 </template>
 
 <script>
 // import { ipcRenderer } from "electron";
-import ComponentPortInfo from "@/components/ComponentPortInfo";
 export default {
   name: "detail",
   data: () => ({
+    snack: false,
+    snackColor: '',
+    snackText: '',
+    max25chars: v => v.length <= 25 || 'Input too long!',
+    pagination: {},
     picker: new Date().toISOString().substr(0, 10),
     date: new Date().toISOString().substr(0, 10),
     modal: false,
@@ -93,22 +123,8 @@ export default {
         value: 'value'
       }
     ],
-    tableData: [
-      {
-        register: '40000',
-        value: 12312
-      },
-      {
-        register: '40001',
-        value: 'empty'
-      },
-      {
-        register: '40002',
-        value: 12312
-      },
-    ]
+    tableData: []
   }),
-  components: { ComponentPortInfo },
   beforeCreate() {
     this.fullPath = this.$route.params.fullPath
   },
@@ -135,7 +151,7 @@ export default {
           }
         ]
       }
-      this.$store.commit("dataTransfer", request);
+      this.$store.dispatch("dataTransfer", request);
     },
     logRegisters() {
       console.log(this.$store.state.registers)
@@ -143,19 +159,55 @@ export default {
     updateTable() {
       let newTableData = []
       for (let i in this.portRegisters) {
-        newTableData.push({
-          register: i,
-          value: this.portRegisters[i]
-        })
+        if (i == '30101') {
+          newTableData.push({
+            access: "rw",
+            register: i,
+            value: this.portRegisters[i]
+          })
+        } else {
+          newTableData.push({
+            access: "ro",
+            register: i,
+            value: this.portRegisters[i]
+          })
+        }
       }
       this.tableData = newTableData
-    }
+    },
+    save (data) {
+      console.log(data)
+      this.snack = true
+      this.snackColor = 'success'
+      this.snackText = 'Data saved'
+      let request = {
+        fullPath: this.fullPath,
+        data: [
+          {
+            type: "write",
+            address: +data.register,
+            value: [+data.value],
+          },
+        ]
+      }
+      this.$store.dispatch("dataTransfer", request);
+    },
+    cancel () {
+      this.snack = true
+      this.snackColor = 'error'
+      this.snackText = 'Canceled'
+    },
+    open () {
+      this.snack = true
+      this.snackColor = 'info'
+      this.snackText = 'Dialog opened'
+    },
+    close () {
+      console.log('Dialog closed')
+    },
   },
   created() {
+    this.updateTable()
   }
 }
 </script>
-
-<style scoped>
-
-</style>

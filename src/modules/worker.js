@@ -11,7 +11,6 @@ export function unixTimeToBit(unixTime) {
     unixTimestamp = unixTime / 1000;
   } else {
     unixTimestamp = new Date().getTime() / 1000;
-    console.log('time:', unixTimestamp)
   }
   const data = [unixTimestamp >> 16, unixTimestamp & 0xffff];
   return data
@@ -28,16 +27,16 @@ export function connect(params) {
 
 export function write(address = 30000, data = null) {
   if (data) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       console.log(`writing ${data} in ${address}`)
       client.writeRegisters(address, data)
         .then((k)=>{
           console.log('success')
           resolve(k)
         })
-        .catch((e)=>{
+        .catch(()=>{
           console.log('you cant edit this address')
-          resolve(e)
+          reject('you cant edit this address')
         })
     })
   } else {
@@ -50,12 +49,9 @@ export function readFc4(address = 40000, length = 1) {
     return new Promise(resolve => {
       client.readInputRegisters(address, length)
         .then((data)=>{
-          console.log(address + ' :', data)
           resolve(data.data)
         })
         .catch((e)=>{
-          // console.log('error in ' + address + ' :', e)
-          console.log(address + ' : empty')
           resolve(e)
         })
     })
@@ -69,7 +65,6 @@ export function readFc4(address = 40000, length = 1) {
     connection = client.readInputRegisters(address, 1)
     connection = connection.then((data)=>{
       answer[first] = data.data
-      console.log(first + ':', data)
     })
     for (let i = address; i < address + length; i++) {
       connection = connection.then(()=>{
@@ -77,12 +72,10 @@ export function readFc4(address = 40000, length = 1) {
           client.readInputRegisters(i, 1)
             .then(function (data) {
               answer[i] = data.data
-              console.log(i + ':', data)
               res()
             })
             .catch(()=>{
               answer[i] = 'empty'
-              console.log(i + ': empty')
               res()
             })
         })
@@ -103,12 +96,9 @@ export function readFc3(address = 40000, length = 1) {
   return new Promise(resolve => {
     client.readHoldingRegisters(address, length)
       .then((data)=>{
-        console.log(address + ' :', data)
         resolve(data.data)
       })
       .catch((e)=>{
-        // console.log('error in ' + address + ' :', e)
-        console.log(address + ' : empty')
         resolve(e)
       })
   })
@@ -119,12 +109,9 @@ export function readTime(address = 30000, length = 2) {
     client.readHoldingRegisters(address, length)
       .then((data)=>{
         let unixTimestamp = bitToUnixTime(data.data)
-        console.log(address + ' :', new Date(unixTimestamp))
         resolve(unixTimestamp)
       })
       .catch((e)=>{
-        // console.log('error in ' + address + ' :', e)
-        console.log(address + ' : empty')
         resolve(e)
       })
   })

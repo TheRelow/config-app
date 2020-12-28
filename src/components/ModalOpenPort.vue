@@ -118,7 +118,7 @@ export default {
         fullPath: this.port + "_" + this.address,
       };
 
-      this.$store.commit("addConnection", request);
+      this.$store.dispatch("addConnection", request);
       console.log("addConnection", request)
     },
   },

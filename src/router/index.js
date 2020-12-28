@@ -29,14 +29,6 @@ const routes = [
         component: () => import(/* webpackChunkName: "connections-detail" */ '../views/connections/detail.vue'),
       },
     ]
-  },
-  {
-    path: '/table',
-    name: 'table',
-    // route level code-splitting
-    // this generates a separate chunk (PageTable.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "table" */ '../views/PageTable.vue')
   }
 ]
 
