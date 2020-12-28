@@ -66,6 +66,9 @@
 <!--          ></v-switch>-->
         </v-toolbar>
       </template>
+      <template v-slot:item.min="props">
+        {{ props.item.min }}
+      </template>
       <template v-slot:item.value="props">
         <v-edit-dialog v-if="props.item.access == 'rw'"
           :return-value.sync="props.item.value"
@@ -99,6 +102,9 @@
 
 <script>
 // import { ipcRenderer } from "electron";
+// eslint-disable-next-line no-unused-vars
+import { driver } from "@/modules/driver";
+
 export default {
   name: "detail",
   data: () => ({
@@ -116,14 +122,39 @@ export default {
         text: 'Registers',
         align: 'start',
         sortable: false,
-        value: 'register'
+        value: 'address'
       },
       {
         text: 'value',
         value: 'value'
-      }
+      },
+      {
+        text: 'access',
+        value: 'access'
+      },
+      {
+        text: 'min',
+        value: 'min'
+      },
+      {
+        text: 'max',
+        value: 'max'
+      },
+      {
+        text: 'data type',
+        value: 'dataType'
+      },
+      {
+        text: 'length',
+        value: 'length'
+      },
+      {
+        text: 'знаков после запятой',
+        value: 'decimal'
+      },
     ],
-    tableData: []
+    tableData: [],
+    driverIndex: []
   }),
   beforeCreate() {
     this.fullPath = this.$route.params.fullPath
@@ -159,19 +190,15 @@ export default {
     updateTable() {
       let newTableData = []
       for (let i in this.portRegisters) {
-        if (i == '30101') {
-          newTableData.push({
-            access: "rw",
-            register: i,
-            value: this.portRegisters[i]
-          })
-        } else {
-          newTableData.push({
-            access: "ro",
-            register: i,
-            value: this.portRegisters[i]
-          })
+        let newEl = {}
+        let elIndex = this.driverIndex.indexOf(i)
+        if (elIndex !== -1) {
+          newEl = driver[elIndex]
         }
+        newEl["value"] = this.portRegisters[i]
+        newEl["address"] = i
+        console.log(newEl)
+        newTableData.push(newEl)
       }
       this.tableData = newTableData
     },
@@ -185,7 +212,7 @@ export default {
         data: [
           {
             type: "write",
-            address: +data.register,
+            address: +data.address,
             value: [+data.value],
           },
         ]
@@ -207,6 +234,10 @@ export default {
     },
   },
   created() {
+    for (let i of driver) {
+      this.driverIndex.push(i.address)
+      console.log(i)
+    }
     this.updateTable()
   }
 }
