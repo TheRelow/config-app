@@ -42,6 +42,7 @@ export default class MainServer {
         port: connections[req.body.fullPath].port
       })
       req.body.data.forEach((i)=>{
+        console.log(i)
         // eslint-disable-next-line no-unused-vars
         let length = 1
         if (i["length"]) {
