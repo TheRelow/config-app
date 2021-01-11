@@ -45,7 +45,6 @@ export default new Vuex.Store({
             fullPath: payload.fullPath,
             data: driver
           }
-          request.data.push({type: "readTime"})
           dispatch("dataTransfer", request)
         })
     }

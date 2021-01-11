@@ -93,9 +93,6 @@ export function readFc4(address = 40000, length = 1) {
 }
 
 export function readFc3(address = 30000, length = 1) {
-  console.log('readFc3')
-  console.log('address', address)
-  console.log('length', length)
   return new Promise(resolve => {
     client.readHoldingRegisters(address, length)
       .then((data)=>{
@@ -109,29 +106,12 @@ export function readFc3(address = 30000, length = 1) {
   })
 }
 
-export function readTime(address = 30000, length = 2) {
-  console.log('reading time')
-  return new Promise(resolve => {
-    client.readHoldingRegisters(address, length)
-      .then((data)=>{
-        let unixTimestamp = bitToUnixTime(data.data)
-        resolve(unixTimestamp)
-      })
-      .catch((e)=>{
-        resolve(e)
-      })
-  })
-}
-
 export function read(address = 40000, length = 1, type = 'auto') {
   if (type.toLowerCase() == 'fc4') {
     return readFc4(address, length)
   }
   if (type.toLowerCase() == 'fc3') {
     return readFc3(address, length)
-  }
-  if (type.toLowerCase() == 'time') {
-    return readTime(address, length)
   }
   if (type.toLowerCase() == 'auto') {
     switch (address.toString()[0]) {
