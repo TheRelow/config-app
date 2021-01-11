@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 const axios = require('axios').default;
+// eslint-disable-next-line no-unused-vars
 import { driver } from "@/modules/driver";
 
 export default new Vuex.Store({
@@ -25,7 +26,6 @@ export default new Vuex.Store({
       }
     },
     setConnection (state, payload) {
-      console.log('setConnection', payload)
       Vue.set(state.connections, payload.fullPath, payload)
     }
   },
@@ -33,15 +33,14 @@ export default new Vuex.Store({
     dataTransfer ({commit}, payload) {
       axios.post('http://localhost:1337/data-transfer', payload)
         .then((answer)=>{
-          console.log('data-transfer', answer)
           commit("setRegister", answer.data)
         })
     },
     addConnection ({commit, dispatch}, payload) {
       axios.post('http://localhost:1337/new-connection', payload)
+        // eslint-disable-next-line no-unused-vars
         .then((k)=>{
           commit("setConnection", payload)
-          console.log(k)
           let request = {
             fullPath: payload.fullPath,
             data: driver

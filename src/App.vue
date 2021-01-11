@@ -61,11 +61,7 @@ export default {
     this.$vuetify.theme.dark = true;
 
     ipcRenderer.on("messageToWin", (e, args) => {
-      console.log(args)
-    });
-    ipcRenderer.on("ui-response", (e, args) => {
-      console.log('args', args)
-      // this.$store.commit("addData", args);
+      console.log('messageToWin', args)
     });
   },
 };

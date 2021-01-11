@@ -3,10 +3,6 @@ module.exports = {
         index: {
             // Entry page for the app
             entry: 'src/main.js'
-        },
-        worker: {
-            // Worker
-            entry: 'src/worker.js'
         }
     },
     pluginOptions: {

@@ -38,8 +38,8 @@ async function createMainWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
   cfg = await getStorageInfo('cfg.json')
-  messageToWin(cfg)
-  messageToWin(screen.getPrimaryDisplay())
+  // messageToWin(cfg)
+  // messageToWin(screen.getPrimaryDisplay())
 
   if (cfg.width == null) {
     cfg.width = width * 0.85

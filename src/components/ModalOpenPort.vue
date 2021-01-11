@@ -96,16 +96,13 @@ export default {
   },
   methods: {
     logg() {
-      console.log(123)
       this.dialog = false;
     },
     onOk() {
-      console.log('ok')
       this.dialog = false;
       this.connection();
     },
     connection() {
-      console.log('connection')
       let request = {
         port: this.port,
         baudRate: this.baudrate,
@@ -119,13 +116,11 @@ export default {
       };
 
       this.$store.dispatch("addConnection", request);
-      console.log("addConnection", request)
     },
   },
   created() {
     axios.get('http://localhost:1337/portlist')
       .then((response)=>{
-        console.log(response.data);
         response.data.forEach((item) => {
           this.ports.push(item.path);
         });
@@ -139,11 +134,6 @@ export default {
     if (this.protocols.length > 0) {
       this.protocol = this.protocols[0];
     }
-    window.addEventListener('keyup', (e)=>{
-      if (e.keyCode === 13) {
-        // console.log(123)
-      }
-    })
   },
 };
 </script>

@@ -4,7 +4,6 @@
       back
     </router-link>
     <h1>{{fullPath}}</h1>
-<!--    <v-btn @click="connectionToPort"> update data </v-btn>-->
     <v-row justify="space-around">
       <v-dialog
         ref="dialog"
@@ -41,13 +40,16 @@
             color="primary"
             @click="connectionToPort"
           >
-<!--            @click="$refs.dialog.save(picker)"-->
             OK
           </v-btn>
         </v-date-picker>
       </v-dialog>
 
     </v-row>
+
+
+
+
     <v-data-table
       :headers="tableHeaders"
       :items="tableData"
@@ -66,8 +68,8 @@
 <!--          ></v-switch>-->
         </v-toolbar>
       </template>
-      <template v-slot:item.min="props">
-        {{ props.item.min }}
+      <template v-slot:item.formatted="props">
+        {{ props.item.formatted }}
       </template>
       <template v-slot:item.value="props">
         <v-edit-dialog v-if="props.item.access == 'rw'"
@@ -97,6 +99,9 @@
         <span v-else>{{ props.item.value }}</span>
       </template>
     </v-data-table>
+    <div v-if="!tableData.length">
+      В этой таблице нет не пустых регистров, возможно выбран не тот порт или адрес
+    </div>
   </div>
 </template>
 
@@ -104,6 +109,8 @@
 // import { ipcRenderer } from "electron";
 // eslint-disable-next-line no-unused-vars
 import { driver } from "@/modules/driver";
+// eslint-disable-next-line no-unused-vars
+import { bitToUnixTime } from "@/modules/worker"
 
 export default {
   name: "detail",
@@ -123,6 +130,10 @@ export default {
         align: 'start',
         sortable: false,
         value: 'address'
+      },
+      {
+        text: 'formatted value',
+        value: 'formatted'
       },
       {
         text: 'value',
@@ -188,16 +199,26 @@ export default {
       console.log(this.$store.state.registers)
     },
     updateTable() {
+      this.logRegisters()
       let newTableData = []
       for (let i in this.portRegisters) {
         let newEl = {}
+        // eslint-disable-next-line no-unused-vars
+        let dataType = null
         let elIndex = this.driverIndex.indexOf(i)
         if (elIndex !== -1) {
           newEl = driver[elIndex]
         }
         newEl["value"] = this.portRegisters[i]
         newEl["address"] = i
-        console.log(newEl)
+        try {
+          dataType = driver[elIndex]['dataType']
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
+        if (dataType == 'unixTime') {
+          let newFormattedVal = bitToUnixTime([this.portRegisters[i], this.portRegisters[+i+1]])
+          newEl["formatted"] = newFormattedVal
+        }
         newTableData.push(newEl)
       }
       this.tableData = newTableData
@@ -236,7 +257,6 @@ export default {
   created() {
     for (let i of driver) {
       this.driverIndex.push(i.address)
-      console.log(i)
     }
     this.updateTable()
   }

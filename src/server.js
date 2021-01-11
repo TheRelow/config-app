@@ -42,7 +42,6 @@ export default class MainServer {
         port: connections[req.body.fullPath].port
       })
       req.body.data.forEach((i)=>{
-        console.log(i)
         // eslint-disable-next-line no-unused-vars
         let length = 1
         if (i["length"]) {
@@ -51,7 +50,6 @@ export default class MainServer {
         if (i.type == "read" || !i.type) {
           connection = connection.then(()=>read(i.address, length))
           connection = connection.then((data) => {
-            console.log('data', data)
             if (length <= 1) {
               answer[req.body.fullPath][i.address] = data
             } else {
@@ -63,6 +61,7 @@ export default class MainServer {
         } else if (i.type == "readTime") {
           connection = connection.then(()=>readTime())
           connection = connection.then((data) => {
+            console.log(data)
             answer[req.body.fullPath]["date"] = data
           })
         } else if (i.type == "write") {

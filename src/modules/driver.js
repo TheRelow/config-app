@@ -1,5 +1,11 @@
 export const driver = [
   {
+    "address": "30000",
+    "length": "2",
+    "access": "rw",
+    "dataType": "unixTime"
+  },
+  {
     "address": "30101",
     "length": "1",
     "access": "rw",
