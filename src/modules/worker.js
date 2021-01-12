@@ -1,8 +1,12 @@
 const ModbusRTU = require("modbus-serial");
 const client = new ModbusRTU();
 
-export function bitToUnixTime(bit) {
+export function uint32ToUnixTime(bit) {
   return ((bit[0] << 16) + bit[1]) * 1000
+}
+
+export function fromUint32(bit) {
+  return ((bit[0] << 16) + bit[1])
 }
 
 export function unixTimeToBit(unixTime) {
@@ -26,21 +30,31 @@ export function connect(params) {
 }
 
 export function write(address = 30000, data = null) {
+  let answer = {
+    status: 'success',
+    value: {}
+  }
   if (data) {
     return new Promise((resolve, reject) => {
-      // console.log(`writing ${data} in ${address}`)
       client.writeRegisters(address, data)
-        .then((k)=>{
-          // console.log('success')
-          resolve(k)
+        .then(()=>{
+          if (data.length < 2) {
+            answer.value[address] = data
+          } else {
+            let currentAddress = address
+            for (let i of data) {
+              answer.value[currentAddress++] = i
+            }
+          }
+          resolve(answer)
         })
         .catch(()=>{
-          // console.log('you cant edit this address')
-          reject('you cant edit this address')
+          answer.status = 'error'
+          reject(answer)
         })
     })
   } else {
-    return 'you need to write something'
+    answer.status = 'error[you need to write something]'
   }
 }
 
@@ -93,15 +107,13 @@ export function readFc4(address = 40000, length = 1) {
 }
 
 export function readFc3(address = 30000, length = 1) {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     client.readHoldingRegisters(address, length)
       .then((data)=>{
-        console.log(data.data)
         resolve(data.data)
       })
       .catch((e)=>{
-        console.log(e)
-        resolve(e)
+        reject(e)
       })
   })
 }

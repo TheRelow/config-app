@@ -10,11 +10,12 @@ import { driver } from "@/modules/driver";
 export default new Vuex.Store({
   state: {
     connections: {},
-    registers: {}
+    registers: {},
+    loading: {}
   },
   mutations: {
     // входные параметры
-    // { COM4_247: { '30101': [ 9 ], date: 1608368644000 } }
+    // { COM4_247: { '30101': [ 9 ] } }
     setRegister (state, payload) {
       for (let fp in payload) {
         if (!state.registers[fp]) {
@@ -27,13 +28,24 @@ export default new Vuex.Store({
     },
     setConnection (state, payload) {
       Vue.set(state.connections, payload.fullPath, payload)
+    },
+    setLoading (state, payload) {
+      Vue.set(state.loading, payload.fullPath, payload.value)
     }
   },
   actions: {
     dataTransfer ({commit}, payload) {
+      commit("setLoading", {
+        fullPath: payload.fullPath,
+        value: true
+      })
       axios.post('http://localhost:1337/data-transfer', payload)
         .then((answer)=>{
           commit("setRegister", answer.data)
+          commit("setLoading", {
+            fullPath: payload.fullPath,
+            value: false
+          })
         })
     },
     addConnection ({commit, dispatch}, payload) {

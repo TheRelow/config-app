@@ -58,10 +58,13 @@ export default class MainServer {
               }
             }
           })
+          connection = connection.catch(() => {
+            answer[req.body.fullPath][i.address] = 'error'
+          })
         } else if (i.type == "readTime") {
           connection = connection.then(()=>readTime())
           connection = connection.then((data) => {
-            console.log(data)
+            console.log('reading time:', data)
             answer[req.body.fullPath]["date"] = data
           })
         } else if (i.type == "write") {

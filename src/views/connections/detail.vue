@@ -47,14 +47,14 @@
 
     </v-row>
 
-
-
+    <div v-if="isLoading">loading...</div>
 
     <v-data-table
       :headers="tableHeaders"
       :items="tableData"
       :items-per-page="5"
       class="elevation-1"
+      v-else
     >
       <template v-slot:top>
         <v-toolbar flat>
@@ -110,7 +110,7 @@
 // eslint-disable-next-line no-unused-vars
 import { driver } from "@/modules/driver";
 // eslint-disable-next-line no-unused-vars
-import { bitToUnixTime } from "@/modules/worker"
+import { uint32ToUnixTime, fromUint32 } from "@/modules/worker"
 
 export default {
   name: "detail",
@@ -177,6 +177,9 @@ export default {
     portRegisters() {
       return this.$store.state.registers[this.fullPath]
     },
+    isLoading() {
+      return this.$store.state.loading[this.fullPath]
+    },
     formatedDate() {
       return new Date(this.picker).getTime()
     }
@@ -214,9 +217,14 @@ export default {
         try {
           dataType = driver[elIndex]['dataType']
           // eslint-disable-next-line no-empty
-        } catch (e) {}
+        } catch (e) {
+          // если типа данных нет, то регистр подгрузился не из драйыера, либо вместе с регистром, у которого длинна больше 1
+        }
         if (dataType == 'unixTime') {
-          let newFormattedVal = bitToUnixTime([this.portRegisters[i], this.portRegisters[+i+1]])
+          let newFormattedVal = uint32ToUnixTime([this.portRegisters[i], this.portRegisters[+i+1]])
+          newEl["formatted"] = newFormattedVal
+        } else if (dataType == 'uint32') {
+          let newFormattedVal = fromUint32([this.portRegisters[i], this.portRegisters[+i+1]])
           newEl["formatted"] = newFormattedVal
         }
         newTableData.push(newEl)
