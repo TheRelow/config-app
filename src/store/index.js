@@ -18,11 +18,18 @@ export default new Vuex.Store({
     // { COM4_247: { '30101': [ 9 ] } }
     setRegister (state, payload) {
       for (let fp in payload) {
-        if (!state.registers[fp]) {
-          Vue.set(state.registers, fp, {})
-        }
+        // if (!state.registers[fp]) {
+        //   Vue.set(state.registers, fp, {})
+        // }
+        // for (let i in payload[fp]) {
+        //   Vue.set(state.registers[fp], i, payload[fp][i])
+        // }
+        state.registers[fp] = []
         for (let i in payload[fp]) {
-          Vue.set(state.registers[fp], i, payload[fp][i])
+          state.registers[fp].push({
+            address: i,
+            value: payload[fp][i]
+          })
         }
       }
     },
