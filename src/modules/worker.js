@@ -2,11 +2,11 @@ const ModbusRTU = require("modbus-serial");
 const client = new ModbusRTU();
 
 export function uint32ToUnixTime(bit) {
-  return ((bit[0] << 16) + bit[1]) * 1000
+  return ((+bit[0] << 16) + +bit[1]) * 1000
 }
 
 export function fromUint32(bit) {
-  return ((bit[0] << 16) + bit[1])
+  return ((+bit[0] << 16) + +bit[1])
 }
 
 export function unixTimeToBit(unixTime) {

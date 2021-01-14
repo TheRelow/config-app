@@ -1,16 +1,16 @@
 <template>
   <div>
     <v-data-table
-    :headers="tableHeaders"
-    :items="portRegisters"
-    :items-per-page="5"
-    class="elevation-1"
-    :loading="isLoading"
-    loading-text="Loading... Please wait"
-  >
+      :headers="tableHeaders"
+      :items="portRegisters"
+      :items-per-page="5"
+      class="elevation-1"
+      :loading="isLoading"
+      loading-text="Loading... Please wait"
+    >
     <template v-slot:top>
       <v-toolbar flat>
-        <v-btn class="save-btn" color="primary" elevation="2" :loading="saving" @click="updateTable">
+        <v-btn class="save-btn" color="primary" elevation="2" :loading="saving" @click="true">
           Обновить
         </v-btn>
         <!--          <v-spacer></v-spacer>-->
@@ -20,21 +20,44 @@
         <!--          ></v-switch>-->
       </v-toolbar>
     </template>
-    <template v-slot:item.custom>
-      just text
+    <template v-slot:item.access="props">
+      {{ driverInfo(props.item.address, 'access') }}
+    </template>
+    <template v-slot:item.min="props">
+      {{ driverInfo(props.item.address, 'min') }}
+    </template>
+    <template v-slot:item.max="props">
+      {{ driverInfo(props.item.address, 'max') }}
+    </template>
+    <template v-slot:item.dataType="props">
+      {{ driverInfo(props.item.address, 'dataType') }}
+    </template>
+    <template v-slot:item.length="props">
+      {{ driverInfo(props.item.address, 'length') }}
+    </template>
+    <template v-slot:item.decimal="props">
+      {{ driverInfo(props.item.address, 'decimal') }}
     </template>
     <template v-slot:item.formatted="props">
-      {{ props.item.formatted }}
+      <div v-if="driverInfo(props.item.address, 'dataType') == 'unixTime'">
+        {{ uint32ToUnixTime([ props.item.value, registerValue(+props.item.address + 1)]) }}
+      </div>
+      <div v-else-if="driverInfo(props.item.address, 'dataType') == 'uint32'">
+        {{ fromUint32([ props.item.value, registerValue(+props.item.address + 1)]) }}
+      </div>
+      <div v-else-if="driverInfo(props.item.address, 'dataType') == 'uint16'">
+        {{ props.item.value }}
+      </div>
     </template>
     <template v-slot:item.value="props">
       <v-edit-dialog v-if="props.item.access == 'rw'"
-                     :return-value.sync="props.item.value"
-                     large
-                     persistent
-                     @save="save(props.item)"
-                     @cancel="cancel"
-                     @open="open"
-                     @close="close"
+       :return-value.sync="props.item.value"
+       large
+       persistent
+       @save="save(props.item)"
+       @cancel="cancel"
+       @open="open"
+       @close="close"
       >
         <div>{{ props.item.value }}</div>
         <template v-slot:input>
@@ -54,13 +77,14 @@
       <span v-else>{{ props.item.value }}</span>
     </template>
   </v-data-table>
-    <div v-if="!tableData.length">В этой таблице нет данных, возможно выбран не тот порт или адрес</div>
+    <div v-if="!portRegisters.length">В этой таблице нет данных, возможно выбран не тот порт или адрес</div>
   </div>
 </template>
 
 <script>
 import {driver} from "@/modules/driver";
-import {fromUint32, uint32ToUnixTime} from "@/modules/worker";
+// eslint-disable-next-line no-unused-vars
+import {uint32ToUnixTime, fromUint32} from "@/modules/worker"
 
 export default {
   name: "ComponentTableRegisters",
@@ -94,10 +118,6 @@ export default {
         value: 'max'
       },
       {
-        text: 'custom',
-        value: 'custom'
-      },
-      {
         text: 'data type',
         value: 'dataType'
       },
@@ -113,7 +133,8 @@ export default {
     tableData: [],
     saving: false,
     max25chars: v => v.length <= 25 || 'Input too long!',
-    driverIndex: []
+    driverIndex: [],
+    registersIndex: []
   }),
   computed: {
     portData() {
@@ -127,37 +148,36 @@ export default {
     },
   },
   methods: {
-    updateTable() {
-      let newTableData = []
-      for (let i in this.portRegisters) {
-        let newEl = {}
-        // eslint-disable-next-line no-unused-vars
-        let dataType = null
-        let elIndex = this.driverIndex.indexOf(i)
-        if (elIndex !== -1) {
-          newEl = driver[elIndex]
+    uint32ToUnixTime(i) {
+      return uint32ToUnixTime(i)
+    },
+    fromUint32(i) {
+      return fromUint32(i)
+    },
+    driverInfo (address, param) {
+      let newEl = {}
+      let elIndex = this.driverIndex.indexOf(address)
+      if (elIndex !== -1) {
+        newEl = driver[elIndex]
+        if (param) {
+          return newEl[param]
         }
-        newEl["value"] = this.portRegisters[i]
-        newEl["address"] = i
-        try {
-          dataType = driver[elIndex]['dataType']
-          // eslint-disable-next-line no-empty
-        } catch (e) {
-          // если типа данных нет, то регистр подгрузился не из драйыера, либо вместе с регистром, у которого длинна больше 1
-        }
-        if (dataType == 'unixTime') {
-          let newFormattedVal = uint32ToUnixTime([this.portRegisters[i], this.portRegisters[+i+1]])
-          newEl["formatted"] = newFormattedVal
-        } else if (dataType == 'uint32') {
-          let newFormattedVal = fromUint32([this.portRegisters[i], this.portRegisters[+i+1]])
-          newEl["formatted"] = newFormattedVal
-        }
-        newTableData.push(newEl)
+        return newEl
       }
-      this.tableData = newTableData
+      return null
+    },
+    registerValue (address) {
+      let newEl = {}
+      let elIndex = this.registersIndex.indexOf(address.toString())
+      if (elIndex !== -1) {
+        newEl = this.portRegisters[elIndex]
+        if (newEl['value']) {
+          return newEl['value'].toString()
+        }
+      }
+      return null
     },
     save (data) {
-      console.log(data)
       this.snack = true
       this.snackColor = 'success'
       this.snackText = 'Data saved'
@@ -191,9 +211,9 @@ export default {
     for (let i of driver) {
       this.driverIndex.push(i.address)
     }
-    this.updateTable()
-    console.log(this.driverIndex)
-    console.log(this.portRegisters)
+    for (let i of this.portRegisters) {
+      this.registersIndex.push(i.address)
+    }
   }
 }
 </script>
