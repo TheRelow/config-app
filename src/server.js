@@ -83,7 +83,8 @@ export default class MainServer {
           let date = unixTimeToBit(i.value)
           connection = connection.then(()=>write(address, date))
           connection = connection.then(() => {
-            answer[req.body.fullPath]["date"] = i.value
+            answer[req.body.fullPath]["30000"] = [date[0]]
+            answer[req.body.fullPath]["30001"] = [date[1]]
           })
         }
       })

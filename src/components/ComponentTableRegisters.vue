@@ -10,14 +10,9 @@
     >
     <template v-slot:top>
       <v-toolbar flat>
-        <v-btn class="save-btn" color="primary" elevation="2" :loading="saving" @click="true">
+        <v-btn class="save-btn" color="primary" elevation="2" :loading="saving" @click="updateTable">
           Обновить
         </v-btn>
-        <!--          <v-spacer></v-spacer>-->
-        <!--          <v-switch-->
-        <!--            class="switch-autosave"-->
-        <!--            label="Автосохранение"-->
-        <!--          ></v-switch>-->
       </v-toolbar>
     </template>
     <template v-slot:item.access="props">
@@ -40,17 +35,41 @@
     </template>
     <template v-slot:item.formatted="props">
       <div v-if="driverInfo(props.item.address, 'dataType') == 'unixTime'">
-        {{ uint32ToUnixTime([ props.item.value, registerValue(+props.item.address + 1)]) }}
+        <ComponentUnixTimeEdit :fullPath="fullPath"></ComponentUnixTimeEdit>
       </div>
       <div v-else-if="driverInfo(props.item.address, 'dataType') == 'uint32'">
         {{ fromUint32([ props.item.value, registerValue(+props.item.address + 1)]) }}
       </div>
       <div v-else-if="driverInfo(props.item.address, 'dataType') == 'uint16'">
-        {{ props.item.value }}
+        <v-edit-dialog v-if="driverInfo(props.item.address, 'access') == 'rw'"
+                       :return-value.sync="props.item.value"
+                       large
+                       persistent
+                       @save="save(props.item)"
+                       @cancel="cancel"
+                       @open="open"
+                       @close="close"
+        >
+          <div>{{ props.item.value }}</div>
+          <template v-slot:input>
+            <div class="mt-4 title">
+              Update value
+            </div>
+            <v-text-field
+              v-model="props.item.value"
+              :rules="[max25chars]"
+              label="Edit"
+              single-line
+              counter
+              autofocus
+            ></v-text-field>
+          </template>
+        </v-edit-dialog>
+        <span v-else>{{ props.item.value }}</span>
       </div>
     </template>
     <template v-slot:item.value="props">
-      <v-edit-dialog v-if="props.item.access == 'rw'"
+      <v-edit-dialog v-if="driverInfo(props.item.address, 'access') == 'rw'"
        :return-value.sync="props.item.value"
        large
        persistent
@@ -77,7 +96,7 @@
       <span v-else>{{ props.item.value }}</span>
     </template>
   </v-data-table>
-    <div v-if="!portRegisters.length">В этой таблице нет данных, возможно выбран не тот порт или адрес</div>
+  <div v-if="!portRegisters.length">В этой таблице нет данных, возможно выбран не тот порт или адрес</div>
   </div>
 </template>
 
@@ -85,9 +104,11 @@
 import {driver} from "@/modules/driver";
 // eslint-disable-next-line no-unused-vars
 import {uint32ToUnixTime, fromUint32} from "@/modules/worker"
+import ComponentUnixTimeEdit from "@/components/ComponentUnixTimeEdit";
 
 export default {
   name: "ComponentTableRegisters",
+  components: {ComponentUnixTimeEdit},
   props: ["fullPath"],
   data: () => ({
     tableHeaders: [
@@ -154,6 +175,15 @@ export default {
     fromUint32(i) {
       return fromUint32(i)
     },
+    updateTable () {
+      this.updateDriverIndex()
+      this.updateRegistersIndex()
+    },
+    updateDriverIndex () {
+      for (let i of driver) {
+        this.driverIndex.push(i.address)
+      }
+    },
     driverInfo (address, param) {
       let newEl = {}
       let elIndex = this.driverIndex.indexOf(address)
@@ -165,6 +195,11 @@ export default {
         return newEl
       }
       return null
+    },
+    updateRegistersIndex () {
+      for (let i of this.portRegisters) {
+        this.registersIndex.push(i.address)
+      }
     },
     registerValue (address) {
       let newEl = {}
@@ -208,12 +243,7 @@ export default {
     },
   },
   created() {
-    for (let i of driver) {
-      this.driverIndex.push(i.address)
-    }
-    for (let i of this.portRegisters) {
-      this.registersIndex.push(i.address)
-    }
+    this.updateTable()
   }
 }
 </script>

@@ -9,6 +9,11 @@ export function fromUint32(bit) {
   return ((+bit[0] << 16) + +bit[1])
 }
 
+export function uint32ToBit(uint32) {
+  const data = [uint32 >> 16, uint32 & 0xffff];
+  return data
+}
+
 export function unixTimeToBit(unixTime) {
   let unixTimestamp
   if (unixTime) {

@@ -11,25 +11,42 @@ export default new Vuex.Store({
   state: {
     connections: {},
     registers: {},
-    loading: {}
+    loading: {},
+    created: {}
   },
   mutations: {
     // входные параметры
     // { COM4_247: { '30101': [ 9 ] } }
     setRegister (state, payload) {
+      console.log('setRegister', payload)
+      console.log('state', state)
       for (let fp in payload) {
-        // if (!state.registers[fp]) {
-        //   Vue.set(state.registers, fp, {})
-        // }
-        // for (let i in payload[fp]) {
-        //   Vue.set(state.registers[fp], i, payload[fp][i])
-        // }
-        state.registers[fp] = []
+        if (!state.registers[fp]) {
+          state.registers[fp] = []
+        } else {
+          // eslint-disable-next-line no-unused-vars
+          let registersIndex = []
+          // for (let i of state.registers[fp]) {
+          //   registersIndex.push(i.address)
+          // }
+          // console.log('registersIndex in state', registersIndex)
+          console.log('something')
+        }
+        let registersIndex = []
+        for (let i of state.registers[fp]) {
+          registersIndex.push(i.address.toString())
+        }
         for (let i in payload[fp]) {
-          state.registers[fp].push({
-            address: i,
-            value: payload[fp][i]
-          })
+          let id = state.registers[fp].find(register => register.address.toString() === i.toString())
+          if (id) {
+            let registerIndex = registersIndex.indexOf(i)
+            Vue.set(state.registers[fp][registerIndex], 'value', payload[fp][i])
+          } else {
+            state.registers[fp].push({
+              address: i,
+              value: payload[fp][i]
+            })
+          }
         }
       }
     },
@@ -37,18 +54,24 @@ export default new Vuex.Store({
       Vue.set(state.connections, payload.fullPath, payload)
     },
     setLoading (state, payload) {
+      console.log(payload)
       Vue.set(state.loading, payload.fullPath, payload.value)
+    },
+    setCreated (state, payload) {
+      console.log(payload)
+      Vue.set(state.created, payload.fullPath, payload.value)
     }
   },
   actions: {
     dataTransfer ({commit}, payload) {
-      commit("setLoading", {
-        fullPath: payload.fullPath,
-        value: true
-      })
       axios.post('http://localhost:1337/data-transfer', payload)
         .then((answer)=>{
+          console.log(answer)
           commit("setRegister", answer.data)
+          commit("setCreated", {
+            fullPath: payload.fullPath,
+            value: true
+          })
           commit("setLoading", {
             fullPath: payload.fullPath,
             value: false
@@ -56,6 +79,10 @@ export default new Vuex.Store({
         })
     },
     addConnection ({commit, dispatch}, payload) {
+      commit("setCreated", {
+        fullPath: payload.fullPath,
+        value: false
+      })
       axios.post('http://localhost:1337/new-connection', payload)
         // eslint-disable-next-line no-unused-vars
         .then((k)=>{
@@ -70,5 +97,13 @@ export default new Vuex.Store({
   },
   getters: {
     connections: s => s.connections,
+    register: state => options => {
+      let registersIndex = []
+      for (let i of state.registers[options.fullPath]) {
+        registersIndex.push(i.address.toString())
+      }
+      let registerIndex = registersIndex.indexOf(options.register.toString())
+      return state.registers[options.fullPath][registerIndex].value
+    }
   },
 })

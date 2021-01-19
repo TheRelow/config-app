@@ -176,5 +176,5 @@ ipcMain.on("window-close", () => {
       await setStorageInfo('cfg.json', cfg)
     }
     win.close();
-  })();
+  })()
 })
