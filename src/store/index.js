@@ -53,17 +53,25 @@ export default new Vuex.Store({
     setConnection (state, payload) {
       Vue.set(state.connections, payload.fullPath, payload)
     },
+    closeConnection (state, payload) {
+      Vue.delete(state.connections, payload)
+      Vue.delete(state.registers, payload)
+      Vue.delete(state.loading, payload)
+      Vue.delete(state.created, payload)
+    },
     setLoading (state, payload) {
-      console.log(payload)
       Vue.set(state.loading, payload.fullPath, payload.value)
     },
     setCreated (state, payload) {
-      console.log(payload)
       Vue.set(state.created, payload.fullPath, payload.value)
     }
   },
   actions: {
     dataTransfer ({commit}, payload) {
+      commit("setLoading", {
+        fullPath: payload.fullPath,
+        value: true
+      })
       axios.post('http://localhost:1337/data-transfer', payload)
         .then((answer)=>{
           console.log(answer)
@@ -84,14 +92,38 @@ export default new Vuex.Store({
         value: false
       })
       axios.post('http://localhost:1337/new-connection', payload)
-        // eslint-disable-next-line no-unused-vars
-        .then((k)=>{
-          commit("setConnection", payload)
+        .then(()=>{
           let request = {
             fullPath: payload.fullPath,
-            data: driver
+            data: [
+              {
+                type: 'read',
+                length: '1',
+                address: '40000'
+              },
+              {
+                type: 'read',
+                length: '1',
+                address: '40001'
+              }
+            ]
           }
-          dispatch("dataTransfer", request)
+          return axios.post('http://localhost:1337/data-transfer', request)
+        })
+        // eslint-disable-next-line no-unused-vars
+        .then((k)=>{
+          console.log(k)
+          if (k.data[payload.fullPath]['40000'].length) {
+            commit("setConnection", payload)
+            let request = {
+              fullPath: payload.fullPath,
+              data: driver
+            }
+            dispatch("dataTransfer", request)
+          } else {
+            commit("setConnection", {...payload, onloadError: true})
+            console.log('chto-to poshlo ne tak')
+          }
         })
     }
   },

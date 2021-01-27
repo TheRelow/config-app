@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" @keydown.esc="onOk" @keydown.enter="onOk" persistent max-width="400">
+  <v-dialog v-model="dialog" @keydown.esc="dialog = false" @keydown.enter="onOk" persistent max-width="400">
     <template v-slot:activator="{ on, attrs }">
       <v-btn v-bind="attrs" v-on="on"> +NEW </v-btn>
     </template>
@@ -55,8 +55,8 @@
 
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="green darken-1" text @click="onOk"> OK </v-btn>
-        <v-btn color="green darken-1" text @click="dialog = false">
+        <v-btn color="primary" text @click="onOk"> OK </v-btn>
+        <v-btn color="primary" text @click="dialog = false">
           Cancel
         </v-btn>
       </v-card-actions>
@@ -110,12 +110,12 @@ export default {
         parity: this.parity,
         stopbits: this.stopbits,
         timeout: 1000, // optional
-        protocol: "RTU",
+        protocol: "Modbus RTU",
         address: this.address,
         fullPath: this.port + "_" + this.address,
       };
-
       this.$store.dispatch("addConnection", request);
+      this.$router.push(`/connections/${this.port + "_" + this.address}`)
     },
   },
   created() {

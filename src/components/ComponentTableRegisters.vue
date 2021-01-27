@@ -7,12 +7,26 @@
       class="elevation-1"
       :loading="isLoading"
       loading-text="Loading... Please wait"
+      :search="search"
+      :custom-filter="filterRegisters"
     >
     <template v-slot:top>
       <v-toolbar flat>
-        <v-btn class="save-btn" color="primary" elevation="2" :loading="saving" @click="updateTable">
-          Обновить
-        </v-btn>
+<!--        <v-btn class="save-btn" color="primary" elevation="2" :loading="saving" @click="updateTable">-->
+<!--          Обновить-->
+<!--        </v-btn>-->
+        <v-checkbox
+          v-model="showHelpRegisters"
+          label="show helper registers"
+          color="primary"
+          value="show helper registers"
+          hide-details
+        ></v-checkbox>
+        <v-text-field
+          v-model="search"
+          label="Search"
+          class="mx-4"
+        ></v-text-field>
       </v-toolbar>
     </template>
     <template v-slot:item.access="props">
@@ -68,33 +82,38 @@
         <span v-else>{{ props.item.value }}</span>
       </div>
     </template>
-    <template v-slot:item.value="props">
-      <v-edit-dialog v-if="driverInfo(props.item.address, 'access') == 'rw'"
-       :return-value.sync="props.item.value"
-       large
-       persistent
-       @save="save(props.item)"
-       @cancel="cancel"
-       @open="open"
-       @close="close"
-      >
-        <div>{{ props.item.value }}</div>
-        <template v-slot:input>
-          <div class="mt-4 title">
-            Update value
-          </div>
-          <v-text-field
-            v-model="props.item.value"
-            :rules="[max25chars]"
-            label="Edit"
-            single-line
-            counter
-            autofocus
-          ></v-text-field>
-        </template>
-      </v-edit-dialog>
-      <span v-else>{{ props.item.value }}</span>
-    </template>
+      <template v-slot:item.value="props">
+        <v-edit-dialog v-if="driverInfo(props.item.address, 'access') == 'rw'"
+                       :return-value.sync="props.item.value"
+                       large
+                       persistent
+                       @save="save(props.item)"
+                       @cancel="cancel"
+                       @open="open"
+                       @close="close"
+        >
+          <div>{{ props.item.value }}</div>
+          <template v-slot:input>
+            <div class="mt-4 title">
+              Update value
+            </div>
+            <v-text-field
+              v-model="props.item.value"
+              :rules="[max25chars]"
+              label="Edit"
+              single-line
+              counter
+              autofocus
+            ></v-text-field>
+          </template>
+        </v-edit-dialog>
+        <span v-else>{{ props.item.value }}</span>
+      </template>
+      <template v-slot:item.controls="props">
+        <v-btn class="save-btn" color="primary" elevation="2" @click="updateValue(props.item.address)" v-if="driverInfo(props.item.address)">
+          Обновить
+        </v-btn>
+      </template>
   </v-data-table>
   <div v-if="!portRegisters.length">В этой таблице нет данных, возможно выбран не тот порт или адрес</div>
   </div>
@@ -111,51 +130,13 @@ export default {
   components: {ComponentUnixTimeEdit},
   props: ["fullPath"],
   data: () => ({
-    tableHeaders: [
-      {
-        text: 'Registers',
-        align: 'start',
-        sortable: false,
-        value: 'address'
-      },
-      {
-        text: 'formatted value',
-        value: 'formatted'
-      },
-      {
-        text: 'value',
-        value: 'value'
-      },
-      {
-        text: 'access',
-        value: 'access'
-      },
-      {
-        text: 'min',
-        value: 'min'
-      },
-      {
-        text: 'max',
-        value: 'max'
-      },
-      {
-        text: 'data type',
-        value: 'dataType'
-      },
-      {
-        text: 'length',
-        value: 'length'
-      },
-      {
-        text: 'знаков после запятой',
-        value: 'decimal'
-      },
-    ],
+    search: '',
+    max25chars: v => v.length <= 25 || 'Input too long!',
     tableData: [],
     saving: false,
-    max25chars: v => v.length <= 25 || 'Input too long!',
     driverIndex: [],
-    registersIndex: []
+    registersIndex: [],
+    showHelpRegisters: false
   }),
   computed: {
     portData() {
@@ -166,6 +147,58 @@ export default {
     },
     isLoading() {
       return this.$store.state.loading[this.fullPath]
+    },
+    tableHeaders() {
+      return [
+        {
+          text: 'Registers',
+          align: 'start',
+          sortable: false,
+          value: 'address',
+          filter: value => {
+            if (!this.showHelpRegisters && this.driverInfo(value) === null) {
+              return false
+            }
+            return true
+          },
+        },
+        {
+          text: 'formatted value',
+          value: 'formatted'
+        },
+        {
+          text: 'value',
+          value: 'value'
+        },
+        {
+          text: 'access',
+          value: 'access'
+        },
+        {
+          text: 'min',
+          value: 'min'
+        },
+        {
+          text: 'max',
+          value: 'max'
+        },
+        {
+          text: 'data type',
+          value: 'dataType'
+        },
+        {
+          text: 'length',
+          value: 'length'
+        },
+        {
+          text: 'знаков после запятой',
+          value: 'decimal'
+        },
+        {
+          text: 'controls',
+          value: 'controls'
+        },
+      ]
     },
   },
   methods: {
@@ -234,12 +267,31 @@ export default {
       this.snackText = 'Canceled'
     },
     open () {
+      console.log('log')
       this.snack = true
       this.snackColor = 'info'
       this.snackText = 'Dialog opened'
     },
     close () {
       console.log('Dialog closed')
+    },
+    updateValue(address) {
+      let request = {
+        fullPath: this.fullPath,
+        data: [
+          this.driverInfo(address)
+        ]
+      }
+      if (this.driverInfo(address)) {
+        this.$store.dispatch("dataTransfer", request);
+      }
+    },
+    // eslint-disable-next-line no-unused-vars
+    filterRegisters (value, search, item) {
+      return item.address != null &&
+        search != null &&
+        typeof item.address === 'string' &&
+        item.address.toString().toLocaleUpperCase().indexOf(search) !== -1
     },
   },
   created() {

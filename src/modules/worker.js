@@ -27,6 +27,7 @@ export function unixTimeToBit(unixTime) {
 
 export function connect(params) {
   if (params) {
+    client.setTimeout(50);
     return client.connectRTUBuffered(params.port, { baudRate: params.baudRate || 9600 })
       .then(()=>{
         client.setID(params.address || 247);

@@ -1,4 +1,4 @@
-import {connect, readTime, close, read, write, unixTimeToBit} from "@/modules/worker";
+import {connect, close, read, write, unixTimeToBit} from "@/modules/worker";
 
 const express = require('express');
 const cors = require('cors')
@@ -59,6 +59,7 @@ export default class MainServer {
             }
           })
           connection = connection.catch(() => {
+            console.log(i.address, 'error')
             answer[req.body.fullPath][i.address] = 'error'
           })
         } else if (i.type == "readTime") {
@@ -92,7 +93,6 @@ export default class MainServer {
         for (let i in answer) {
           registers[i] = answer[i]
         }
-        console.log(answer)
         res.send(answer)
         close()
       })
